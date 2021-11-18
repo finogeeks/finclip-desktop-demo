@@ -70,22 +70,17 @@
 
 ## 📦 安装第三方依赖
 Windows 小程序运行环境需要安装以下依赖，请提前配置环境：
-- 需要安装 Microsoft WebView2 支持 [点我下载](https://developer.microsoft.com/zh-cn/microsoft-edge/webview2/#download-section)
+- 请下载依赖包[点我下载](https://app.finogeeks.com/lib.tar.gz.bz2)
+- 下载完后解压到vendor/finclip/lib目录中
 - 建议使用 Visual Studio 2019 版本 [点我下载](https://support.microsoft.com/en-us/topic/the-latest-supported-visual-c-downloads-2647da03-1eea-4433-9aff-95f26a218cc0)
 
-## 💿 集成SDK
-Windows 版本 FinClip 运行时一共有 4 个文件：
-
-1. finclip-api.h：API 定义文件
-2. finclip-sdk.h：接口定义文件
-3. FinClipSDK.lib：链接库文件(x86/x64)
-4. FinClipSDK.dll：动态链接库(x86/x64)
+**注意：依赖包必须随缩主程序一同发布，并在独立目录中存放。**
 
 ### 第一步 引入头文件
 
 ```c++
-#include "finclip-sdk.h"
-#pragma comment(lib, "FinClipSDK.lib")
+#include "finclip_wrapper.h" //引入头文件
+#pragma comment(lib, "FinClipSDKWrapper.lib") //引入链接库
 ```
 
 ### 第二步 初始化SDK
@@ -127,7 +122,7 @@ Windows 版本 FinClip 运行时一共有 4 个文件：
 ```
 
 ### 查看 API 文档
-您可以点击这里查看 [FinClipSDK WindowsAPI](https://docs.finogeeks.club/docs/finclip-win32/) 的开发文档
+您可以点击这里查看 [FinClipSDK WindowsAPI](https://docs.finogeeks.club/docs/finclip-win32/wrapper) 的开发文档
 
 ## 🔗 常用链接
 以下内容是您在 FinClip 进行开发与体验时，常见的问题与指引信息
