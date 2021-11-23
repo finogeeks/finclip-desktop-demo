@@ -1,7 +1,8 @@
 // FinClip.cpp : Defines the entry point for the application.
 //
 #include "Resource.h"
-#include "finclip_wrapper.h"
+#include "vendor/finclip/include/finclip_api.h"
+#include "vendor/finclip/include/finclip_wrapper.h"
 // Windows Header Files
 #include <windows.h>
 // C RunTime Header Files
@@ -15,9 +16,10 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#pragma comment(lib, "FinClipSDKWrapper.lib")
 
 #define MAX_LOADSTRING 100
+#pragma comment(lib, "FinClipSDKWrapper.lib")
+
 using namespace std;
 using json = nlohmann::json;
 
@@ -59,14 +61,29 @@ std::wstring utf8_decode(const std::string &str, int CP = CP_UTF8) {
   MultiByteToWideChar(CP, 0, &str[0], (int)str.size(), &wstrTo[0], size_needed);
   return wstrTo;
 }
-class CustomApi : public IApi {
 
-  void invoke(const char *event, const char *param,
-              FinClipSDKCallback callback) {
+class CustomWebApi : public IApi {
+
+  void invoke(const char *event, const char *param, IApiCallback *callback) {
 
     std::string data = param;
     std::string e = event;
-    MessageBox(NULL, utf8_decode(e).c_str(), utf8_decode(data).c_str(), 0);
+    callback->Callback("{\"data\":\"ok\"}");
+  }
+
+  FinClipApiType GetApiType() const { return FinClipApiType::kWebView; }
+
+  const char *apis() { return "customWebApi"; }
+  size_t size() { return 1l; }
+};
+
+class CustomApi : public IApi {
+
+  void invoke(const char *event, const char *param, IApiCallback *callback) {
+
+    std::string data = param;
+    std::string e = event;
+    callback->Callback("{\"data\":\"ok\"}");
   }
 
   FinClipApiType GetApiType() const { return FinClipApiType::kApplet; }
@@ -197,6 +214,8 @@ void init_finclipsdk(int app_store, std::wstring wappkey, std::wstring wsecret,
   configpacker->AddConfig(config);
   CustomApi *c_api = new CustomApi();
   configpacker->RegisterApi(c_api);
+  CustomWebApi *c_web_api = new CustomWebApi();
+  configpacker->RegisterApi(c_web_api);
   Initialize(hInst, configpacker);
   is_initialized = TRUE;
 }
@@ -209,25 +228,8 @@ void finclip_applet_callback(IEvent *event) {
     const char *val = event->GetStr("hWnd");
     std::string s(val);
     hWnd_applet = (HWND)strtoul(s.c_str(), NULL, 16);
-    /*       ::SetParent(hWnd, gHwnd);
-           ::SetWindowPos(hWnd, NULL, 0, 0, 414, 736, 0);
-           ::ShowWindow(hWnd, SW_SHOWNORMAL);*/
   }
   event->Release();
-  // HWND hWnd = event->GetHandle();
-  // //::PostMessage(hWnd, WM_SYSCOMMAND, SW_MAXIMIZE, 0);
-  // //::PostMessage(hWnd, WM_SYSCOMMAND, SC_MAXIMIZE, 0);
-
-  // COPYDATASTRUCT CopyData;
-  // char           szSendBuf[100];
-  // time_t         timenow;
-  // time(&timenow);
-  // sprintf(szSendBuf, "%s", ctime(&timenow));
-  // //注意，ctime()返回的字符串后面带了'\n' CopyData.dwData                = 0;
-  // CopyData.cbData                = strlen(szSendBuf);
-  // szSendBuf[CopyData.cbData - 1] = '\0';
-  // CopyData.lpData                = szSendBuf;
-  // ::SendMessage(hWnd, WM_COPYDATA, (WPARAM)gHwnd, (LPARAM)&CopyData);
 }
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
                          LPARAM lParam) {
@@ -237,6 +239,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
 
   case WM_COMMAND:
     if (LOWORD(wParam) == IDM_SENDMESSAGE) {
+      WCHAR appid[1024];
+      GetWindowText(hWnd_appid, appid, 1023);
+      std::wstring wappid(appid);
+
+      InvokeWebApi(utf8_encode(wappid).c_str(), "test_custom_api",
+                   "{params:'a'}");
+      break;
     }
     if (LOWORD(wParam) == IDM_START_APPLET) {
       WCHAR key[1024];
@@ -318,6 +327,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
     int i = 0;
     int j = 0;
     ::SetWindowPos(hWnd_container, NULL, 450, 10, 450, 750, 0);
+    /*InvalidateRect(hWnd_container, NULL, TRUE);
+    UpdateWindow(hWnd_container);*/
     break;
   }
   case WM_DESTROY: {
@@ -411,7 +422,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         CreateWindowW(L"BUTTON", L"open", WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
                       100, 250, 200, 50, hWnd, (HMENU)IDM_START_APPLET,
                       ((LPCREATESTRUCT)lParam)->hInstance, NULL);
-    CreateWindowW(L"BUTTON", L"sendmessage",
+    CreateWindowW(L"BUTTON", L"InvokeWebApi",
                   WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON, 100, 350, 200, 50,
                   hWnd, (HMENU)IDM_SENDMESSAGE,
                   ((LPCREATESTRUCT)lParam)->hInstance, NULL);

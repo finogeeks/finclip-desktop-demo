@@ -44,7 +44,7 @@ DLL_EXPORT IPackerFactory* FINSTDMETHODCALLTYPE GetPackerFactory();
  * @warning 警告
  * @exception 异常
  */
-DLL_EXPORT HRESULT FINSTDMETHODCALLTYPE CloseAllApplet();
+DLL_EXPORT int FINSTDMETHODCALLTYPE CloseAllApplet();
 
 /**
  * @brief 函数简介
@@ -59,7 +59,7 @@ DLL_EXPORT HRESULT FINSTDMETHODCALLTYPE CloseAllApplet();
  * @warning 警告
  * @exception 异常
  */
-DLL_EXPORT HRESULT FINSTDMETHODCALLTYPE CleanCache();
+DLL_EXPORT int FINSTDMETHODCALLTYPE CleanCache();
 
 ///小程序Api
 /**打开小程序
@@ -70,12 +70,30 @@ DLL_EXPORT HRESULT FINSTDMETHODCALLTYPE CleanCache();
  * @param callback 打开小程序回调
  * @return 0表示成功，1表示失败
  */
-DLL_EXPORT HRESULT FINSTDMETHODCALLTYPE StartApplet(HWND hWnd, int apptype, const char* appid, const char* page_path,
-                                                    IFinPacker* params, FinClipSDKCallback callback);
+DLL_EXPORT int FINSTDMETHODCALLTYPE StartApplet(HWND hWnd, int appstore, const char* appid, const char* page_path,
+                                                IFinPacker* params, FinClipSDKCallback callback);
+/**
+ * @brief Set the Applet Pos object
+ *
+ * @param appid
+ * @param appstore
+ * @param left
+ * @param top
+ * @param width
+ * @param height
+ * @return DLL_EXPORT
+ */
+DLL_EXPORT void FINSTDMETHODCALLTYPE SetAppletPos(const char* appid, int appstore, int left, int top, int width,
+                                                  int height);
 
-DLL_EXPORT HWND FINSTDMETHODCALLTYPE    SetAppletPos(const char* appid, int appstore, int left, int top, int width,
-                                                     int height);
-DLL_EXPORT HRESULT FINSTDMETHODCALLTYPE FinClipShutdown();
+/**
+ * @brief
+ *
+ * @return DLL_EXPORT
+ */
+DLL_EXPORT int FINSTDMETHODCALLTYPE FinClipShutdown();
+
+DLL_EXPORT int FINSTDMETHODCALLTYPE InvokeWebApi(const char* app_id, const char* api_name, const char* params);
 
 #ifdef __cplusplus
 }

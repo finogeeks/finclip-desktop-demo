@@ -16,7 +16,7 @@
 #include <windows.h>
 /**
  * @brief 自定义API类型，分别用于小程序和jssdk
- * 
+ *
  */
 enum class FinClipApiType
 {
@@ -25,16 +25,12 @@ enum class FinClipApiType
 };
 /**
  * @brief 接口基类
- * 
+ *
  */
 struct IKnown
 {};
 
 /// SDK统一事件接口
-
-
-
-
 
 /**
  * @brief API返回结果
@@ -42,7 +38,7 @@ struct IKnown
  "size": 100,
  "data": [[{},{}...],[{},{}...]]
 }
- 
+
  */
 struct IResultSet : public IKnown
 {
@@ -113,7 +109,7 @@ public:
 };
 /**
  * @brief SDK返回数据
- * 
+ *
  */
 struct IEvent : public IResultSet
 {
@@ -141,6 +137,13 @@ struct IEvent : public IResultSet
 
     virtual void Release() = 0;
 };
+
+struct IApiCallback
+{
+
+public:
+    virtual void Callback(const char* event) = 0;
+};
 //函数指针回调
 /**
  * @params ret 调用结果 0成功,1失败
@@ -148,7 +151,7 @@ struct IEvent : public IResultSet
  * 如下格式
  *
  */
-typedef void (*FinClipSDKCallback)(IEvent* event);
+typedef void (*FinClipSDKCallback)(IEvent*);
 
 ///数据打包器接口
 struct IFinPacker : public IKnown
@@ -260,7 +263,7 @@ struct IApi
      * @param param 参数
      * @param callback 结果回调返回
      */
-    virtual void invoke(const char* event, const char* param, FinClipSDKCallback callback) = 0;
+    virtual void invoke(const char* event, const char* param, IApiCallback* callback) = 0;
 
     /**
      * @brief Api类型，分为小程序api和webview api
