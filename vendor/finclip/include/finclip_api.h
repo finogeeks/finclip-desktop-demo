@@ -14,6 +14,20 @@
 #define FIN_OK 0
 #define FIN_FAIL 1
 #include <windows.h>
+namespace com::finogeeks::finclip::wrapper {
+
+/**
+ * @brief 启动机制设置
+ * kAsync: 异步启动
+ * kBaseLibrarySync: 基础库同步加载
+ * kAppletSync: 小程序同步加载
+ */
+enum StartFlags
+{
+    kAsync           = 0,
+    kBaseLibrarySync = 1 << 0,
+    kAppletSync      = 1 << 1,
+};
 /**
  * @brief 自定义API类型，分别用于小程序和jssdk
  *
@@ -250,6 +264,30 @@ public:
      * @return void
      */
     virtual void SetAppWindowStyle(int type) = 0;
+    /**
+     * @brief 离线基础库zip包路径
+     * @param path
+     * @return void
+     */
+    virtual void SetOfflineBaseLibrary(const char* path) = 0;
+    /**
+     * @brief 离线小程序zip包路径
+     * @param path
+     * @return void
+     */
+    virtual void SetOfflineApplet(const char* path) = 0;
+    /**
+     * @brief 设置小程序窗口类型
+     * @param type 0:独立窗口，1:子窗口
+     * @return void
+     */
+    virtual void SetShowLoading(int type) = 0;
+    /**
+     * @brief 设置启动机制
+     * @param flag: StartFlags
+     * @return void
+     */
+    virtual void SetStartFlag(int flag) = 0;
 };
 /*
  * 接口注入api
@@ -352,4 +390,5 @@ public:
      */
     virtual IFinPacker* GetFinPacker() = 0;
 };
+}   // namespace com::finogeeks::finclip::wrapper
 #endif   // !__H_FINCLIPAPI_H__

@@ -1,7 +1,6 @@
-// FinClip.cpp : Defines the entry point for the application.
+ï»¿// FinClip.cpp : Defines the entry point for the application.
 //
 #include "Resource.h"
-#include "vendor/finclip/include/finclip_api.h"
 #include "vendor/finclip/include/finclip_wrapper.h"
 // Windows Header Files
 #include <windows.h>
@@ -17,18 +16,20 @@
 #include <iostream>
 #include <sstream>
 
-#define MAX_LOADSTRING 100
 #pragma comment(lib, "FinClipSDKWrapper.lib")
+
+#define MAX_LOADSTRING 100
 
 using namespace std;
 using json = nlohmann::json;
-
+using namespace com::finogeeks::finclip::wrapper;
 HINSTANCE hInst;
 HWND gHwnd;                          // current instance
 WCHAR szTitle[MAX_LOADSTRING];       // The title bar text
 WCHAR szWindowClass[MAX_LOADSTRING]; // the main window class name
 
 ATOM MyRegisterClass(HINSTANCE hInstance);
+ATOM MyRegisterClass1(HINSTANCE hInstance);
 BOOL InitInstance(HINSTANCE, int);
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 HWND hWnd_appkey;
@@ -40,6 +41,9 @@ HWND hWnd_container;
 HWND hWnd_applet;
 BOOL is_initialized = FALSE;
 RECT g_rect_;
+std::string offline_base_path;
+std::string offline_applet_path;
+
 std::string utf8_encode(const std::wstring &wstr, int CP = CP_UTF8) {
   if (wstr.empty())
     return std::string();
@@ -94,6 +98,7 @@ class CustomApi : public IApi {
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                       _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine,
                       _In_ int nCmdShow) {
+  SetProcessDPIAware();
   UNREFERENCED_PARAMETER(hPrevInstance);
   UNREFERENCED_PARAMETER(lpCmdLine);
 
@@ -101,7 +106,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
   LoadStringW(hInstance, IDC_FINCLIPWIN32DEMO, szWindowClass, MAX_LOADSTRING);
 
   MyRegisterClass(hInstance);
-
+  MyRegisterClass1(hInstance);
   if (!InitInstance(hInstance, nCmdShow)) {
     return FALSE;
   }
@@ -173,15 +178,22 @@ ATOM MyRegisterClass1(HINSTANCE hInstance) {
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow) {
   hInst = hInstance; // Store instance handle in our global variable
   DWORD dwStyle =
-      WS_OVERLAPPEDWINDOW & ~WS_MAXIMIZEBOX & ~WS_MINIMIZEBOX; //ÉèÖÃ´°ÌåÑùÊ½
+      WS_OVERLAPPEDWINDOW & ~WS_MAXIMIZEBOX & ~WS_MINIMIZEBOX; //ï¿½ï¿½ï¿½Ã´ï¿½ï¿½ï¿½ï¿½ï¿½Ê½
 
   HWND hWnd =
       CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT,
                     0, 1000, 800, nullptr, nullptr, hInstance, nullptr);
-
+  HMONITOR hmon = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
+  MONITORINFO mi = {sizeof(mi)};
+  if (!GetMonitorInfo(hmon, &mi))
+    return FALSE;
   if (!hWnd) {
     return FALSE;
   }
+  int width = 450;
+  int height = 500;
+  SetWindowPos(hWnd, NULL, mi.rcMonitor.left, mi.rcMonitor.top, width, height,
+               SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
   gHwnd = hWnd;
   ShowWindow(hWnd, nCmdShow);
   UpdateWindow(hWnd);
@@ -191,7 +203,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow) {
 
 void init_finclipsdk(int app_store, std::wstring wappkey, std::wstring wsecret,
                      std::wstring wdomain) {
-  if (is_initialized) {
+  if (is_initialized != 0) {
     return;
   }
 
@@ -210,11 +222,14 @@ void init_finclipsdk(int app_store, std::wstring wappkey, std::wstring wsecret,
   config->SetEncryptType(1);
   config->SetFinger("");
   config->SetAppWindowStyle(1);
-
+  config->SetOfflineApplet(offline_applet_path.data());
+  config->SetOfflineBaseLibrary(offline_base_path.data());
+  config->SetStartFlag(StartFlags::kAppletSync);
+  config->SetShowLoading(0);
   configpacker->AddConfig(config);
-  CustomApi *c_api = new CustomApi();
+  auto *c_api = new CustomApi();
   configpacker->RegisterApi(c_api);
-  CustomWebApi *c_web_api = new CustomWebApi();
+  auto *c_web_api = new CustomWebApi();
   configpacker->RegisterApi(c_web_api);
   Initialize(hInst, configpacker);
   is_initialized = TRUE;
@@ -242,9 +257,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
       WCHAR appid[1024];
       GetWindowText(hWnd_appid, appid, 1023);
       std::wstring wappid(appid);
-
-      InvokeWebApi(utf8_encode(wappid).c_str(), "test_custom_api",
-                   "{params:'a'}");
+      CleanCache();
+      // if (hWnd_container) {
+      //     DestroyWindow(hWnd_container);
+      // }
+      // InvokeWebApi(utf8_encode(wappid).c_str(), "test_custom_api",
+      // "{params:'a'}");
       break;
     }
     if (LOWORD(wParam) == IDM_START_APPLET) {
@@ -264,23 +282,23 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
       std::wstring wdomain(domain);
       std::wstring wtype(type);
       if (wappkey.length() == 0) {
-        MessageBox(NULL, L"ÇëÊäÈëappKey", L"ÌáÊ¾", 0);
+        MessageBox(NULL, L"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½appKey", L"ï¿½ï¿½Ê¾", 0);
         return 0;
       }
       if (wsecret.length() == 0) {
-        MessageBox(NULL, L"ÇëÊäÈëSecret", L"ÌáÊ¾", 0);
+        MessageBox(NULL, L"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Secret", L"ï¿½ï¿½Ê¾", 0);
         return 0;
       }
       if (wappid.length() == 0) {
-        MessageBox(NULL, L"ÇëÊäÈëappid", L"ÌáÊ¾", 0);
+        MessageBox(NULL, L"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½appid", L"ï¿½ï¿½Ê¾", 0);
         return 0;
       }
       if (wdomain.length() == 0) {
-        MessageBox(NULL, L"ÇëÊäÈëdomain", L"ÌáÊ¾", 0);
+        MessageBox(NULL, L"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½domain", L"ï¿½ï¿½Ê¾", 0);
         return 0;
       }
       if (wtype.length() == 0) {
-        MessageBox(NULL, L"ÇëÊäÈëtype", L"ÌáÊ¾", 0);
+        MessageBox(NULL, L"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½type", L"ï¿½ï¿½Ê¾", 0);
         return 0;
       }
       int appstore = 1;
@@ -288,56 +306,112 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
       IFinConfigPacker *configpacker = factory->GetFinConfigPacker();
       IFinConfig *config = configpacker->GetConfig(appstore);
       config->SetAppWindowStyle(std::stol(wtype));
-      //->SetAppWindowStyle(std::stol(wtype));
       IFinPacker *packer = factory->GetFinPacker();
       packer->BeginPacker();
       packer->Add("appId", utf8_encode(wappid).c_str());
       packer->Add("query", "1");
       packer->EndPacker();
       int len = packer->GetBufferSize() + 1;
-      unsigned char *ret = new unsigned char[len];
+      auto *ret = new unsigned char[len];
       memset(ret, 0, len);
       packer->Dump(ret, &len);
       delete[] ret;
+      if (hWnd_container == nullptr) {
+        // hWnd_container = CreateWindowW(L"child_finclip", L"ï¿½ï¿½ï¿½Ô´ï¿½ï¿½ï¿½",
+        // WS_OVERLAPPEDWINDOW | WS_VISIBLE, 0,
+        //	0, 1920, 1080, NULL, NULL,
+        //	hInst, NULL);
+        hWnd_container = CreateWindowW(L"child_finclip", L"ï¿½ï¿½ï¿½Ô´ï¿½ï¿½ï¿½",
+                                       WS_OVERLAPPEDWINDOW | WS_VISIBLE, 0, 0,
+                                       1024, 768, NULL, NULL, hInst, NULL);
+      }
       HRESULT hr =
           StartApplet(hWnd_container, appstore, utf8_encode(wappid).c_str(), "",
-                      packer, finclip_applet_callback);
+                      packer, "", finclip_applet_callback);
+
       if (hr == S_OK) {
       }
       // SetWindowPos(h, NULL, 0, 300, 400, 436, 0);
       packer->Release();
     }
     break;
-  case WM_SHOWWINDOW: {
-    WCHAR key[1024];
-    GetWindowText(hWnd_appkey, key, 1023);
-    WCHAR secret[1024];
-    GetWindowText(hWnd_secret, secret, 1023);
-    WCHAR appid[1024];
-    GetWindowText(hWnd_appid, appid, 1023);
-    WCHAR domain[1024];
-    GetWindowText(hWnd_domain, domain, 1023);
-    std::wstring wappkey(key);
-    std::wstring wsecret(secret);
-    std::wstring wappid(appid);
-    std::wstring wdomain(domain);
-    init_finclipsdk(1, wappkey, wsecret, wdomain);
-  } break;
-  case WM_SYSCOMMAND: {
-    int i = 0;
-    int j = 0;
-    ::SetWindowPos(hWnd_container, NULL, 450, 10, 450, 750, 0);
-    /*InvalidateRect(hWnd_container, NULL, TRUE);
-    UpdateWindow(hWnd_container);*/
+  case WM_CLOSE: {
+    if (hWnd == hWnd_container) {
+      hWnd_container = NULL;
+    }
     break;
   }
+
+  case WM_SHOWWINDOW: {
+    if (hWnd == hWnd_container) {
+      /*RECT rc;
+      GetWindowRect(hWnd, &rc);
+      auto left = 0;
+      auto top = 0;
+      auto width = rc.right - rc.left;
+      auto height = rc.bottom - rc.top;
+      WCHAR appid[1024];
+      GetWindowText(hWnd_appid, appid, 1023);
+      SetAppletPos(utf8_encode(std::wstring(appid)).c_str(), 1, 0, top, width,
+      height);
+      */
+    } else {
+      WCHAR key[1024];
+      GetWindowText(hWnd_appkey, key, 1023);
+      WCHAR secret[1024];
+      GetWindowText(hWnd_secret, secret, 1023);
+      WCHAR appid[1024];
+      GetWindowText(hWnd_appid, appid, 1023);
+      WCHAR domain[1024];
+      GetWindowText(hWnd_domain, domain, 1023);
+      std::wstring wappkey(key);
+      std::wstring wsecret(secret);
+      std::wstring wappid(appid);
+      std::wstring wdomain(domain);
+      init_finclipsdk(1, wappkey, wsecret, wdomain);
+    }
+  } break;
+  case WM_SIZE: {
+    WCHAR type[1024];
+    GetWindowText(hWnd_type, type, 1023);
+    std::wstring wtype(type);
+    if (wtype == L"1") {
+      UINT width = LOWORD(lParam);
+      UINT height = HIWORD(lParam);
+      WCHAR appid[1024];
+      GetWindowText(hWnd_appid, appid, 1023);
+      RECT rect;
+      GetClientRect(hWnd_container, &rect);
+      SetAppletPos(utf8_encode(std::wstring(appid)).c_str(), 0, 0,
+                   rect.right - rect.left, rect.bottom - rect.top, true);
+    }
+
+    break;
+  }
+  // case WM_PAINT:
+  // {
+  //     // WCHAR type[1024];
+  //     // GetWindowText(hWnd_type, type, 1023);
+  //     // std::wstring wtype(type);
+  //     // if (wtype == L"1") {
+  //     //     RECT rect;
+  //     //     GetClientRect(hWnd_container, &rect);
+  //     //     WCHAR appid[1024];
+  //     //     GetWindowText(hWnd_appid, appid, 1023);
+  //     //     SetAppletPos(
+  //     //         utf8_encode(std::wstring(appid)).c_str(), 0, 0, rect.right -
+  //     rect.left, rect.bottom - rect.top,
+  //     //         true);
+  //     // }
+  //     break;
+  // }
   case WM_DESTROY: {
-    FinClipShutdown();
     PostQuitMessage(0);
     break;
   }
   case WM_CREATE: {
-
+    if (hWnd_appkey)
+      return DefWindowProcW(hWnd, message, wParam, lParam);
     CreateWindowW(L"static", L"AppKEY", WS_CHILD | WS_VISIBLE, 20, 20, 60, 30,
                   hWnd, (HMENU)1, ((LPCREATESTRUCT)lParam)->hInstance, NULL);
 
@@ -352,18 +426,26 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
     CreateWindowW(L"static", L"window_type", WS_CHILD | WS_VISIBLE, 20, 180, 60,
                   30, hWnd, (HMENU)2, ((LPCREATESTRUCT)lParam)->hInstance,
                   NULL);
-
-    hWnd_container = CreateWindowW(L"static", L"", WS_CHILD | WS_VISIBLE, 450,
-                                   10, 450, 750, hWnd, (HMENU)2,
-                                   ((LPCREATESTRUCT)lParam)->hInstance, NULL);
+    HMONITOR hmon = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
+    MONITORINFO mi = {sizeof(mi)};
+    if (!GetMonitorInfo(hmon, &mi))
+      return false;
+    auto left = mi.rcMonitor.left;
+    auto top = mi.rcMonitor.top;
+    auto width = mi.rcMonitor.right - mi.rcMonitor.left;
+    auto height = mi.rcMonitor.bottom - mi.rcMonitor.top;
+    // hWnd_container = CreateWindowW(L"static", L"", WS_CHILD | WS_VISIBLE,
+    // left,
+    //	top, width, height, hWnd, (HMENU)2,
+    //	((LPCREATESTRUCT)lParam)->hInstance, NULL);
 
     wstring domain(L"https://finchat-mop-b.finogeeks.club");
     wstring appkey(L"22LyZEib0gLTQdU3MUauAQVLIkNNhTSGIN42gXzlAsk=");
     wstring appid(L"60e3c059949a5300014d0c07");
     wstring secret(L"ae55433be2f62915");
 
-    // ´ÓexeÆô¶¯, config.json·ÅÔÚexeÍ¬Ò»Ä¿Â¼
-    // ´ÓvsÆô¶¯, config.json·ÅÔÚFinclip/
+    // ï¿½ï¿½exeï¿½ï¿½ï¿½ï¿½, config.jsonï¿½ï¿½ï¿½ï¿½exeÍ¬Ò»Ä¿Â¼
+    // ï¿½ï¿½vsï¿½ï¿½ï¿½ï¿½, config.jsonï¿½ï¿½ï¿½ï¿½Finclip/
     auto path = std::filesystem::current_path();
     if (std::filesystem::exists("config.json")) {
       std::ifstream t("config.json");
@@ -390,7 +472,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         auto s = field.value().get<std::string>();
         secret = wstring(s.begin(), s.end());
       }
-      t.close();
+      field = obj.find("offline_applet_path");
+      if (field != obj.end() && field.value().is_string()) {
+        auto s = field.value().get<std::string>();
+        offline_applet_path = string(s.begin(), s.end());
+      }
+      field = obj.find("offline_base_path");
+      if (field != obj.end() && field.value().is_string()) {
+        auto s = field.value().get<std::string>();
+        offline_base_path = string(s.begin(), s.end());
+      }
     }
     hWnd_appkey = CreateWindowW(
         L"EDIT", appkey.c_str(), WS_VISIBLE | WS_CHILD | WS_BORDER | ES_LEFT,
