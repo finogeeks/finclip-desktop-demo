@@ -70,8 +70,8 @@
 
 ## 📦 安装第三方依赖
 Windows 小程序运行环境需要安装以下依赖，请提前配置环境：
-- 请下载依赖包[点我下载](https://app.finogeeks.com/finclip-lib.tar.gz.bz2)
-- 下载完后解压到vendor/finclip/lib目录中
+- 请下载依赖包[点我下载](https://public-1251849568.cos.ap-guangzhou.myqcloud.com/sdk/lib.zip)
+- 下载完后解压到vendor/finclip目录中
 - 建议使用 Visual Studio 2019 版本 [点我下载](https://support.microsoft.com/en-us/topic/the-latest-supported-visual-c-downloads-2647da03-1eea-4433-9aff-95f26a218cc0)
 
 **注意：依赖包必须随缩主程序一同发布，并在独立目录中存放。**
