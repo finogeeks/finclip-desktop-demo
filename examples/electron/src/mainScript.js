@@ -1,0 +1,3 @@
+window.openFinClipWindow = () => {
+  finclip.open();
+};
