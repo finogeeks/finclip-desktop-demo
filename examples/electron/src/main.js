@@ -39,11 +39,12 @@ const openFinClipWindow = () => {
   finClipWindow = win;
   const handleBuffer = finClipWindow.getNativeWindowHandle();
   const handle = os.endianness() == 'LE' ? handleBuffer.readInt32LE() : handleBuffer.readInt32BE();
-  const finclipPath = path.resolve(__dirname, '../../../vendor/win/x64');
-  finclip.start({
+  const finclipPath = path.resolve(__dirname, '../../../vendor/win/x64/finclip.exe');
+  const result = finclip.start({
     handle,
     finclipPath,
   });
+  console.log(result);
 };
 
 const closeFinClipWindow = () => {

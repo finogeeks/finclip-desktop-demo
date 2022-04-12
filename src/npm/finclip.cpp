@@ -14,6 +14,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <ostream>
 #include <sstream>
 
 #include "json.hpp"
@@ -182,35 +183,6 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow) {
   return TRUE;
 }
 
-void InitFinclipsdk(int app_store, const std::wstring& wappkey,
-                    const std::wstring& wsecret, const std::wstring& wdomain,
-                    const char* path) {
-  if (is_initialized != 0) {
-    return;
-  }
-
-  std::string appkey = Utf8Encode(wappkey);
-  std::string secret = Utf8Encode(wsecret);
-  std::string domain = Utf8Encode(wdomain);
-
-  auto* factory = finclip_get_packer_factory();
-  auto* packer = finclip_packer_factory_get_config_packer(factory);
-  auto* config = finclip_config_packer_new_config(packer);
-  finclip_config_packer_add_config(packer, config);
-  finclip_config_set_app_store(config, app_store);
-  finclip_config_set_app_key(config, appkey.c_str());
-  finclip_config_set_secret(config, secret.c_str());
-  finclip_config_set_domain(config, domain.c_str());
-  finclip_config_set_start_flag(config, kAppletSync);
-  finclip_config_set_show_loading(config, false);
-  finclip_config_set_exe_path(config, path);
-  finclip_register_callback(packer, kApplet, "api", CustomApi);
-  finclip_register_callback(packer, kWebView, "webapi", CustomApi);
-
-  finclip_initialize(packer);
-  is_initialized = TRUE;
-}
-
 bool toggle = false;
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
                          LPARAM lParam) {
@@ -361,8 +333,7 @@ Napi::String start(const Napi::CallbackInfo& info) {
   string appid("60e3c059949a5300014d0c07");
   string secret("ae55433be2f62915");
   string type("1");
-  auto path = args.Get("finclipPath").ToString().Utf8Value().c_str();
-
+  std::string path = args.Get("finclipPath").ToString();
   auto* factory = finclip_get_packer_factory();
   auto* packer = finclip_packer_factory_get_config_packer(factory);
   auto* config = finclip_config_packer_new_config(packer);
@@ -373,10 +344,9 @@ Napi::String start(const Napi::CallbackInfo& info) {
   finclip_config_set_domain(config, domain.c_str());
   finclip_config_set_start_flag(config, kAppletSync);
   finclip_config_set_show_loading(config, false);
-  finclip_config_set_exe_path(config, path);
+  finclip_config_set_exe_path(config, path.c_str());
   finclip_register_callback(packer, kApplet, "api", CustomApi);
   finclip_register_callback(packer, kWebView, "webapi", CustomApi);
-
   finclip_initialize(packer);
   finclip_start_applet(appstore, appid.c_str());
 
@@ -392,8 +362,7 @@ Napi::String start(const Napi::CallbackInfo& info) {
   current_appid = Utf8Decode(appid);
   //   SetAppletPos(Utf8Encode(wappid).c_str(), 0, 30, 540, 960, true);
   //   packer->Release();
-  return Napi::String::New(
-      env, args.Get("finclipPath").ToString().Utf8Value().c_str());
+  return Napi::String::New(env, path);
 }
 
 Napi::String close(const Napi::CallbackInfo& info) {
