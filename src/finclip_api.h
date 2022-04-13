@@ -1,5 +1,3 @@
-#ifndef SRC_FINCLIP_API_H_
-#define SRC_FINCLIP_API_H_
 #ifndef WRAPPER_SRC_PUBLIC_FINCLIP_API_H_
 #define WRAPPER_SRC_PUBLIC_FINCLIP_API_H_
 
@@ -44,6 +42,21 @@ DLL_EXPORT int FINSTDMETHODCALLTYPE finclip_start_applet(int appstore,
  * @brief
  */
 DLL_EXPORT int FINSTDMETHODCALLTYPE finclip_close_all_applet();
+
+/**
+ * @brief 根据appid关闭小程序
+ */
+DLL_EXPORT int FINSTDMETHODCALLTYPE finclip_close_applet(const char* appid);
+
+/**
+ * @brief 设置小程序主程序位置
+ * 需要设置
+ *
+ */
+DLL_EXPORT void FINSTDMETHODCALLTYPE finclip_set_position(const char* appid,
+                                                          int left, int top,
+                                                          int width,
+                                                          int height);
 
 /**
  * @brief
@@ -107,19 +120,22 @@ DLL_EXPORT void FINSTDMETHODCALLTYPE
 finclip_config_set_app_window_style(IFinConfig* config, int type);
 
 /**
- * @brief
+ * @brief 设置启动模式, 参见: StartFlags
+ * 全同步模式: kBaseLibrarySync | kAppletSync
  */
 DLL_EXPORT void FINSTDMETHODCALLTYPE
 finclip_config_set_start_flag(IFinConfig* config, int flag);
 
 /**
- * @brief
+ * @brief 是否展示loading动画
  */
 DLL_EXPORT void FINSTDMETHODCALLTYPE
 finclip_config_set_show_loading(IFinConfig* config, bool show_loading);
 
 /**
- * @brief
+ * @brief 设置小程序主程序执行文件的位置, 当宿主程序和exe不在同一目录时,
+ * 需要设置
+ *
  */
 DLL_EXPORT void FINSTDMETHODCALLTYPE
 finclip_config_set_exe_path(IFinConfig* config, const char* exe_path);
@@ -156,5 +172,3 @@ DLL_EXPORT int FINSTDMETHODCALLTYPE finclip_invoke_api_cpp(FinClipApiType type,
 #endif
 
 #endif /* WRAPPER_SRC_PUBLIC_FINCLIP_API_H_ */
-
-#endif /* SRC_FINCLIP_API_H_ */

@@ -61,7 +61,7 @@ void CustomApi(const char* event, const char* param,
 
 namespace NodeFinClip {
 using namespace Napi;
-std::wstring current_appid;
+std::string current_appid;
 
 Napi::String start(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
@@ -99,7 +99,8 @@ Napi::String start(const Napi::CallbackInfo& info) {
   //       hWnd_container, appstore, Utf8Encode(wappid).c_str(), "", packer,
   //       args.Get("finclipPath").ToString().Utf8Value().c_str(),
   //       FinclipAppletCallback);
-  current_appid = Utf8Decode(appid);
+  current_appid = appid;
+  finclip_set_position(current_appid.c_str(), 1000, 300, 540, 960);
   //   SetAppletPos(Utf8Encode(wappid).c_str(), 0, 30, 540, 960, true);
   //   packer->Release();
   return Napi::String::New(env, path);
@@ -118,8 +119,7 @@ Napi::String setAppletPos(const Napi::CallbackInfo& info) {
   int top = args.Get("top").ToNumber().Int32Value();
   int width = args.Get("width").ToNumber().Int32Value();
   int height = args.Get("height").ToNumber().Int32Value();
-  //   SetAppletPos(Utf8Encode(current_appid).c_str(), left, top, width, height,
-  //                true);
+  finclip_set_position(current_appid.c_str(), left, top, width, height);
   return Napi::String::New(env, "success");
 }
 
