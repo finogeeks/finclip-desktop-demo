@@ -21,6 +21,7 @@ const openFinClipWindow = () => {
     width: 540,
     height: 990,
     autoHideMenuBar: true,
+    show: false,
     webPreferences: {
       preload: path.join(__dirname, 'finclipPreload.js'),
     },
@@ -48,9 +49,10 @@ const openFinClipWindow = () => {
 };
 
 const closeFinClipWindow = () => {
-  finclip.close();
-  finClipWindow.destroy();
+  const result = finclip.close();
+  finClipWindow && finClipWindow.destroy();
   finClipWindow = undefined;
+  console.log(result);
 };
 
 ipcMain.on('OPEN_FINCLIP_WINDOW', (event, arg) => {
