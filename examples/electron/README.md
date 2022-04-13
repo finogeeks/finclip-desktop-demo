@@ -1,5 +1,9 @@
 # finclip-electron-demo
 
+## 添加二进制依赖
+
+下载finclip二进制包到`vendor`的对应目录下，如`vendor/win/x64`
+
 ## 快速开始
 
 ```
@@ -9,7 +13,7 @@ npm run start
 
 ## 调用finclip api
 
-1. 引入finclip包
+1. 引入finclip依赖包
 
     注意，只能在electron的主进程使用
 
@@ -25,9 +29,14 @@ npm run start
         handle: 0,
         finclipPath,
     });
-  ```
+    ```
+
 3. 关闭finclip窗口
 
     ```
     finclip.close();
     ```
+
+## 修改finclip依赖包
+
+如果默认的finclip包无法满足需求，可以在此项目的`src/npm`下修改并编译，需要先配置C++环境
