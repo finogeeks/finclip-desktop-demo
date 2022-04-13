@@ -37,6 +37,12 @@ npm run start
     finclip.close();
     ```
 
+4. 设置finclip窗口的位置和大小
+
+    ```
+    finclip.setPosition({ width: 800, height: 800, left: 0, top: 0 });
+    ```
+
 ## 修改finclip依赖包
 
 如果默认的finclip包无法满足需求，可以在此项目的`src/npm`下修改并编译，需要先配置C++环境
