@@ -68,19 +68,36 @@
 
 > 当前 Windows 版本 SDK 还在持续研发中，我们将及时同步桌面版本小程序的研发进度，如有需要请与我们联系。
 
-# 集成Finclip
-
-Finclip支持
-
-任何语言的集成, 都需要下载finclip的完整库
-部分语言会提供额外的库, 方便集成
+# sdk支持状况
 
 |  语言 | GUI技术  | 状态  | 系统          |  demo地址  |  语言库 |
 |---|---|---|---|---|---|
-| C++ | win32 | 测试中 | Windows | [win32](examples/win32/README.md)  | 无 |
-| Python | pyqt 5 | 开发中 | Windows / Mac | [Pyqt](examples/pyqt/README.md) |   |
-| JavaScript | Electron | 测试中 | Windows | [Electron](examples/electron/README.md) |   |
-| Rust | tauri | 开发中 | Mac | [Electron](examples/electron/README.md) |   |
+| C++ | win32 | 测试中 | Windows | [win32](examples/win32)  | 无 |
+| Python | pyqt 5 | 开发中 | Windows / Mac | [Pyqt](examples/pyqt) |   |
+| JavaScript | Electron | 测试中 | Windows | [Electron](examples/electron) |   |
+
+# 运行demo
+
+## 第一步: 下载对应的base包
+根据你的系统和 架构, 下载对应的finclip-sdk
+
+假如你是 Windows 32位, 则下载finclip-sdk-win-x86-x.y.z.zip, 并解压至vendor/win/x86目录下
+
+
+
+## 第二步: 下载语言SDK
+
+部分语言, 例如python,Javascript, 我们提供了对应语言的库.
+
+C / C++ 可以直接调用, 无须额外的库
+
+## 第三步: 运行
+
+根据demo文档, 将相应文件准备好后, 即可运行
+
+# 集成
+
+
 
 ### 查看 API 文档
 您可以点击这里查看 [FinClipSDK WindowsAPI](https://docs.finogeeks.club/docs/finclip-win32/wrapper) 的开发文档
