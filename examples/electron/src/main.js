@@ -36,6 +36,14 @@ ipcMain.on('CLOSE_FINCLIP_WINDOW', (event, arg) => {
   closeFinClipWindow();
 });
 
+ipcMain.on('SET_FINCLIP_WINDOW_SIZE', (event, arg) => {
+  const { left, top, width, height } = arg;
+  finclip.setAppletPos({
+    left, top,
+    width, height,
+  });
+});
+
 app.whenReady().then(() => {
   createMainWindow();
 });

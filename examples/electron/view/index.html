@@ -1,8 +1,17 @@
 <html>
     <head></head>
     <body>
-        <button onclick="openFinClipWindow()">open</button>
-        <button onclick="closeFinClipWindow()">close</button>
+        <div>
+            <button onclick="openFinClipWindow()">open</button>
+            <button onclick="closeFinClipWindow()">close</button>
+        </div>
+        <div>
+            left<input type="number" id="left" name="left">
+            top<input type="number" id="top" name="top">
+            width<input type="number" id="width" name="width">
+            height<input type="number" id="height" name="height">
+            <button onclick="setFinClipPosition()">set position</button>
+        </div>
     </body>
     <script src="../src/mainScript.js"></script>
 </html>
