@@ -94,8 +94,8 @@
 
 查看文档，在准备好相应的文件后，即可运行 FinClip DEMO；
 
-### 查看 API 文档
-您可以点击这里查看 [FinClipSDK WindowsAPI](https://docs.finogeeks.club/docs/finclip-win32/wrapper) 的开发文档
+### 查看集成文档
+您可以点击这里查看 [Windows 集成](https://www.finclip.com/mop/document/runtime-sdk/windows/windows-integrate.html) 的集成开发文档。
 
 ## 🔗 常用链接
 以下内容是您在 FinClip 进行开发与体验时，常见的问题与指引信息
