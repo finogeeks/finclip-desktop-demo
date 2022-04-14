@@ -46,7 +46,12 @@ Windows 小程序运行环境需要安装以下依赖，请提前配置环境：
 
 
 ### 第三步 打开小程序
-
+直接从vs启动需要设置 workding dir 为 "$(ProjectDir)\build\bin\x64\Debug", 见下图
+<p align="center">
+    <a href="#">
+    <img width="auto" src="./config.png">
+    </a>
+</p>
 ```c++
   int appstore = 1; // 与第二步一致
   finclip_start_applet(appstore, "这里输入 APP ID");
