@@ -5,10 +5,10 @@
 </p>
 
 <p align="center"> 
-    <strong>FinClip Windows DEMO</strong></br>
+    <strong>FinClip Desktop DEMO</strong></br>
 <p>
 <p align="center"> 
-        Windows 小程序 DEMO
+        桌面版小程序 DEMO
 <p>
 
 <p align="center"> 
@@ -68,7 +68,7 @@
 
 > 我们已经提供了 DEMO 资源，您可以下载运行，以便获取对应的效果。如果您有相关商业化使用需求，也请与我们联系。
 
-## Windows SDK 支持进展
+## 桌面版 SDK 支持进展
 
 由于不同应用程序所依赖的语言不同，我们分别为 Win32，Python，JavaScript 提供了不同的 DEMO，您可在下方表格中获取资源或查看研发进展。
 
