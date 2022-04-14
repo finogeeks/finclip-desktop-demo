@@ -1,8 +1,8 @@
 # finclip-electron-demo
 
-## 添加二进制依赖
+## 📦 安装第三方依赖
 
-下载finclip二进制包到`vendor`的对应目录下，如`vendor/win/x64`
+[下载finclip二进制包](https://github.com/finogeeks/finclip-win32-demo/releases)到`vendor`的对应目录下，如`vendor/win/x64`
 
 ## 快速开始
 

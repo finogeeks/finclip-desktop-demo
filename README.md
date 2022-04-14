@@ -76,7 +76,7 @@
 |---|---|---|---|---|---|
 | C++ | win32 | 测试中 | Windows | [win32](examples/win32)  | 无 |
 | Python | pyqt 5 | 开发中 | Windows / Mac | [Pyqt](examples/pyqt) |   |
-| JavaScript | Electron | 测试中 | Windows | [Electron](examples/electron) |   |
+| JavaScript | Electron | 测试中 | Windows | [Electron](examples/electron) | [node](https://github.com/finogeeks/finclip-win32-demo/releases)  |
 
 ## DEMO 运行与 SDK 集成说明
 
@@ -94,9 +94,9 @@
 
 查看文档，在准备好相应的文件后，即可运行 FinClip DEMO；
 
-### 查看集成文档
-您可以点击这里查看 [Windows 集成](https://www.finclip.com/mop/document/runtime-sdk/windows/windows-integrate.html) 的集成开发文档。
+## 查看集成文档
 
+在demo文档中, 我们也描述了在该语言环境下, 如何集成FinClip SDK
 ## 🔗 常用链接
 以下内容是您在 FinClip 进行开发与体验时，常见的问题与指引信息
 
