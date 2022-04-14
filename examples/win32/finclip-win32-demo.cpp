@@ -286,36 +286,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
           return 0;
         }
         InitFinclipsdk(appstore, wappkey, wsecret, wdomain);
-        // IPackerFactory* factory = GetPackerFactory();
-        // IFinConfigPacker* configpacker = factory->GetFinConfigPacker();
-        // IFinConfig* config = configpacker->GetConfig(appstore);
-        // config->SetAppWindowStyle(std::stol(wtype));
-        // IFinPacker* packer = factory->GetFinPacker();
-        // packer->BeginPacker();
-        // packer->Add("appId", Utf8Encode(wappid).c_str());
-        // packer->Add("query", "1");
-        // packer->EndPacker();
-        // int len = packer->GetBufferSize() + 1;
-        // auto* ret = new unsigned char[len];
-        // memset(ret, 0, len);
-        // packer->Dump(ret, &len);
-        // delete[] ret;
-
-        if (wtype == L"1") {
-          // 嵌入模式, 准备一个窗口, 用于嵌入小程序
-          if (hWnd_container == nullptr) {
-            hWnd_container =
-                CreateWindowW(L"child_finclip", L"child_finclip",
-                              WS_OVERLAPPEDWINDOW | WS_VISIBLE, 0, 0, 1024, 768,
-                              nullptr, nullptr, hInst, nullptr);
-          }
-          finclip_start_applet(appstore, Utf8Encode(wappid).c_str());
-
-        } else {
-          finclip_start_applet(appstore, Utf8Encode(wappid).c_str());
-        }
-
-        // packer->Release();
+        finclip_start_applet(appstore, Utf8Encode(wappid).c_str());
       }
       break;
     case WM_SIZE: {
