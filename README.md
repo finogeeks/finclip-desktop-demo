@@ -68,71 +68,36 @@
 
 > 当前 Windows 版本 SDK 还在持续研发中，我们将及时同步桌面版本小程序的研发进度，如有需要请与我们联系。
 
-## 📦 安装第三方依赖
-Windows 小程序运行环境需要安装以下依赖，请提前配置环境：
-- 请下载依赖包[点我下载](https://public-1251849568.cos.ap-guangzhou.myqcloud.com/sdk/lib.zip)
-- 下载完后解压到vendor/finclip目录中
-- 建议使用 Visual Studio 2019 版本 [点我下载](https://support.microsoft.com/en-us/topic/the-latest-supported-visual-c-downloads-2647da03-1eea-4433-9aff-95f26a218cc0)
+# sdk支持状况
 
-**注意：依赖包必须随缩主程序一同发布，并在独立目录中存放。**
+|  语言 | GUI技术  | 状态  | 系统          |  demo地址  |  语言库 |
+|---|---|---|---|---|---|
+| C++ | win32 | 测试中 | Windows | [win32](examples/win32)  | 无 |
+| Python | pyqt 5 | 开发中 | Windows / Mac | [Pyqt](examples/pyqt) |   |
+| JavaScript | Electron | 测试中 | Windows | [Electron](examples/electron) |   |
 
-解压后文件目录结构如下：
+# 运行demo
 
-```
-vendor
- |--finclip
- |   |--lib
- |        |--****
- |        |--****
- |        |--****
- ...
-```
+## 第一步: 下载对应的base包
+根据你的系统和 架构, 下载对应的finclip-sdk
+
+假如你是 Windows 32位, 则下载finclip-sdk-win-x86-x.y.z.zip, 并解压至vendor/win/x86目录下
 
 
-### 第一步 引入头文件
 
-```c++
-#include "finclip_wrapper.h" //引入头文件
-#pragma comment(lib, "FinClipSDKWrapper.lib") //引入链接库
-```
+## 第二步: 下载语言SDK
 
-### 第二步 初始化SDK
+部分语言, 例如python,Javascript, 我们提供了对应语言的库.
 
-```c++
-  FinConfig config = {
-		1,
-		"https://api.finclip.com",
-		"/api/v1/mop",
-		"这里输入SDK KEY",
-		"这里输入SDK SECRET",
-		"",
-		1
-	};
-	IFinConfigPacker* configpacker = NewFinConfigPacker();
-	configpacker->AddConfig(config);
-	Initialize(hInstance, configpacker);
-```
+C / C++ 可以直接调用, 无须额外的库
 
-- **SDK KEY** 和 **SDK SECRET** 可以从 [FinClip](https://finclip.com/#/home)  获取，点 [这里](https://finclip.com/#/register) 注册账号；
-- 进入平台后，在「应用管理」页面添加你自己的包名后，点击「复制」即可获得  key\secret\apisever 字段；
-- **apiServer** 和 **apiPrefix** 是固定字段，请直接参考本 DEMO ；
-- **小程序 ID** 是管理后台上架的小程序 APP ID，需要在「小程序管理」中创建并在「应用管理」中关联；
-> 小程序 ID 与 微信小程序ID 不一样哦！（这里是特指 FinClip 平台的 ID ）
+## 第三步: 运行
+
+根据demo文档, 将相应文件准备好后, 即可运行
+
+# 集成
 
 
-### 第三步 打开小程序
-
-```c++
-  int server_type = 1;
-  init_finclipsdk(server_type,wappkey, wsecret);
-  IFinPacker* packer = NewFinPacker();
-  packer->BeginPacker();
-  packer->AddField("appId");
-  packer->AddValue("appId");
-  packer->EndPacker();
-  StartApplet(server_type, utf8_encode(wappid).c_str(), packer, finclip_applet_callback);
-  packer->Release();
-```
 
 ### 查看 API 文档
 您可以点击这里查看 [FinClipSDK WindowsAPI](https://docs.finogeeks.club/docs/finclip-win32/wrapper) 的开发文档
