@@ -74,14 +74,14 @@
 |---|---|---|---|---|---|
 | C++ | win32 | 测试中 | Windows | [win32](examples/win32)  | 无 |
 | Python | pyqt 5 | 开发中 | Windows / Mac | [Pyqt](examples/pyqt) |   |
-| JavaScript | Electron | 测试中 | Windows | [Electron](examples/electron) |   |
+| JavaScript | Electron | 测试中 | Windows | [Electron](examples/electron) | [node](https://github.com/finogeeks/finclip-win32-demo/releases)  |
 
 # 运行demo
 
 ## 第一步: 下载对应的base包
-根据你的系统和 架构, 下载对应的finclip-sdk
+根据你的系统和架构, 下载对应的finclip-sdk
 
-假如你是 Windows 32位, 则下载finclip-sdk-win-x86-x.y.z.zip, 并解压至vendor/win/x86目录下
+假如你是 Windows 64位, 则下载finclip-win-x64-x.y.z.zip, 并解压至vendor/win/x64目录下
 
 
 
@@ -97,11 +97,7 @@ C / C++ 可以直接调用, 无须额外的库
 
 # 集成
 
-
-
-### 查看 API 文档
-您可以点击这里查看 [FinClipSDK WindowsAPI](https://docs.finogeeks.club/docs/finclip-win32/wrapper) 的开发文档
-
+在demo文档中, 我们也描述了在该语言环境下, 如何集成FinClip SDK
 ## 🔗 常用链接
 以下内容是您在 FinClip 进行开发与体验时，常见的问题与指引信息
 
