@@ -14,7 +14,12 @@ const createMainWindow = () => {
   win.loadFile('../view/index.html');
 };
 
-const openFinClipWindow = () => {
+const openFinClipWindow = (arg) => {
+  const { domain, appkey, appid, secret } = arg;
+  finclip.setDomain(domain);
+  finclip.setAppkey(appkey);
+  finclip.setAppid(appid);
+  finclip.setSecret(secret);
   const finclipPath = path.resolve(__dirname, '../../../vendor/win/x64/finclip.exe');
   const result = finclip.start({
     handle: 0,
@@ -29,7 +34,7 @@ const closeFinClipWindow = () => {
 };
 
 ipcMain.on('OPEN_FINCLIP_WINDOW', (event, arg) => {
-  openFinClipWindow();
+  openFinClipWindow(arg);
 });
 
 ipcMain.on('CLOSE_FINCLIP_WINDOW', (event, arg) => {

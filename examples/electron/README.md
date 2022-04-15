@@ -21,7 +21,16 @@ npm run start
     const finclip = require('finclip');
     ```
 
-2. 打开finclip窗口
+2. 设置启动参数
+
+    ```
+    finclip.setDomain('xxx');
+    finclip.setAppkey('xxx');
+    finclip.setAppid('xxx');
+    finclip.setSecret('xxx');
+    ```
+
+3. 打开finclip窗口
 
    finclipPath为finclip.exe所在位置，需转换成绝对路径
     ```
@@ -31,13 +40,13 @@ npm run start
     });
     ```
 
-3. 关闭finclip窗口
+4. 关闭finclip窗口
 
     ```
     finclip.close();
     ```
 
-4. 设置finclip窗口的位置和大小
+5. 设置finclip窗口的位置和大小
 
     ```
     finclip.setPosition({ width: 800, height: 800, left: 0, top: 0 });

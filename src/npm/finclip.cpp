@@ -61,17 +61,21 @@ void CustomApi(const char* event, const char* param,
 
 namespace NodeFinClip {
 using namespace Napi;
-std::string current_appid;
+// std::string current_appid;
+std::string domain;
+std::string appkey;
+std::string appid;
+std::string secret;
 
 Napi::String start(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
   Napi::Object args = info[0].ToObject();
   int handle = args.Get("handle").ToNumber().Int32Value();
   int appstore = 1;
-  string domain("https://finchat-mop-b.finogeeks.club");
-  string appkey("22LyZEib0gLTQdU3MUauAQVLIkNNhTSGIN42gXzlAsk=");
-  string appid("60e3c059949a5300014d0c07");
-  string secret("ae55433be2f62915");
+  // string domain("https://finchat-mop-b.finogeeks.club");
+  // string appkey("22LyZEib0gLTQdU3MUauAQVLIkNNhTSGIN42gXzlAsk=");
+  // string appid("60e3c059949a5300014d0c07");
+  // string secret("ae55433be2f62915");
   string type("1");
   std::string path = args.Get("finclipPath").ToString();
   auto* factory = finclip_get_packer_factory();
@@ -99,8 +103,8 @@ Napi::String start(const Napi::CallbackInfo& info) {
   //       hWnd_container, appstore, Utf8Encode(wappid).c_str(), "", packer,
   //       args.Get("finclipPath").ToString().Utf8Value().c_str(),
   //       FinclipAppletCallback);
-  current_appid = appid;
-  finclip_set_position(current_appid.c_str(), 1000, 300, 540, 960);
+  // current_appid = appid;
+  finclip_set_position(appid.c_str(), 1000, 300, 540, 960);
   //   SetAppletPos(Utf8Encode(wappid).c_str(), 0, 30, 540, 960, true);
   //   packer->Release();
   return Napi::String::New(env, path);
@@ -119,7 +123,7 @@ Napi::String setAppletPos(const Napi::CallbackInfo& info) {
   int top = args.Get("top").ToNumber().Int32Value();
   int width = args.Get("width").ToNumber().Int32Value();
   int height = args.Get("height").ToNumber().Int32Value();
-  finclip_set_position(current_appid.c_str(), left, top, width, height);
+  finclip_set_position(appid.c_str(), left, top, width, height);
   return Napi::String::New(env, "success");
 }
 
@@ -131,9 +135,39 @@ Napi::String createWindow(const Napi::CallbackInfo& info) {
   return Napi::String::New(env, "success");
 }
 
+Napi::String setDomain(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  domain = info[0].ToString();
+  return Napi::String::New(env, "success");
+}
+
+Napi::String setAppid(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  appid = info[0].ToString();
+  return Napi::String::New(env, "success");
+}
+
+Napi::String setAppkey(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  appkey = info[0].ToString();
+  return Napi::String::New(env, "success");
+}
+
+Napi::String setSecret(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  secret = info[0].ToString();
+  return Napi::String::New(env, "success");
+}
+
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports.Set(Napi::String::New(env, "start"), Napi::Function::New(env, start));
   exports.Set(Napi::String::New(env, "close"), Napi::Function::New(env, close));
+
+  exports.Set(Napi::String::New(env, "setDomain"), Napi::Function::New(env, setDomain));
+  exports.Set(Napi::String::New(env, "setAppid"), Napi::Function::New(env, setAppid));
+  exports.Set(Napi::String::New(env, "setAppkey"), Napi::Function::New(env, setAppkey));
+  exports.Set(Napi::String::New(env, "setSecret"), Napi::Function::New(env, setSecret));
+
   exports.Set(Napi::String::New(env, "setAppletPos"),
               Napi::Function::New(env, setAppletPos));
   exports.Set(Napi::String::New(env, "createWindow"),
