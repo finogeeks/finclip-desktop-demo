@@ -2,15 +2,38 @@
     <head></head>
     <body>
         <div>
+            <div>
+                启动参数
+            </div>
+            <div>
+                domain<input type="string" id="domain" name="domain" value="https://finchat-mop-b.finogeeks.club">
+            </div>
+            <div>
+                appkey<input type="string" id="appkey" name="appkey" value="22LyZEib0gLTQdU3MUauAQVLIkNNhTSGIN42gXzlAsk=">
+            </div>
+            <div>
+                appid<input type="string" id="appid" name="appid" value="60e3c059949a5300014d0c07">
+            </div>
+            <div>
+                secret<input type="string" id="secret" name="secret" value="ae55433be2f62915">
+            </div>
+        </div>
+        <div>
             <button onclick="openFinClipWindow()">open</button>
             <button onclick="closeFinClipWindow()">close</button>
         </div>
         <div>
-            left<input type="number" id="left" name="left" value="10">
-            top<input type="number" id="top" name="top" value="10">
-            width<input type="number" id="width" name="width" value="1000">
-            height<input type="number" id="height" name="height" value="1000">
-            <button onclick="setFinClipPosition()">set position</button>
+            <br />
+        </div>
+        <div>
+            <div>
+                设置位置
+            </div>
+            <div>left<input type="number" id="left" name="left" value="10"></div>
+            <div>top<input type="number" id="top" name="top" value="10"></div>
+            <div>width<input type="number" id="width" name="width" value="1000"></div>
+            <div>height<input type="number" id="height" name="height" value="1000"></div>
+            <div><button onclick="setFinClipPosition()">set position</button></div>
         </div>
     </body>
     <script src="../src/mainScript.js"></script>
