@@ -35,4 +35,4 @@ flowchart LR
 
 参见首页表格
 
-https://github.com/finogeeks/finclip-win32-demo
+https://github.com/finogeeks/finclip-desktop-demo

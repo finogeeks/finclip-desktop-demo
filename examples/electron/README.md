@@ -1,8 +1,10 @@
 # finclip-electron-demo
 
-## 📦 安装第三方依赖
+## 通用步骤与功能介绍
 
-[下载finclip二进制包](https://github.com/finogeeks/finclip-win32-demo/releases)到`vendor`的对应目录下，如`vendor/win/x64`
+ 快速开始前请先阅读以下链接
+
+[Finclip桌面版Demo简介](https://github.com/finogeeks/finclip-desktop-demo/tree/master/examples)
 
 ## 快速开始
 

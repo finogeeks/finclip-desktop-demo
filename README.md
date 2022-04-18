@@ -76,7 +76,7 @@
 |---|---|---|---|---|---|
 | C++ | win32 | 测试中 | Windows | [win32](examples/win32)  | 无 |
 | Python | pyqt 5 | 开发中 | Windows / Mac | [Pyqt](examples/pyqt) |   |
-| JavaScript | Electron | 测试中 | Windows | [Electron](examples/electron) | [node](https://github.com/finogeeks/finclip-win32-demo/releases)  |
+| JavaScript | Electron | 测试中 | Windows | [Electron](examples/electron) | [node](https://github.com/finogeeks/finclip-desktop-demo/releases)  |
 
 ## DEMO 运行与 SDK 集成说明
 

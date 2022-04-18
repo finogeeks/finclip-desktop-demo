@@ -1,23 +1,19 @@
-# 📦 安装第三方依赖
-Windows 小程序运行环境需要安装以下依赖，请提前配置环境：
-- 请下载依赖包[点我下载](https://github.com/finogeeks/finclip-win32-demo/releases)
-- 如果您使用的是64位版本, 请解压至vendor/win/x64文件
-- 建议使用 Visual Studio 2019或以上版本
+# 通用步骤与功能介绍
 
-# demo运行
-## 下载依赖
-[下载finclip二进制包](https://github.com/finogeeks/finclip-win32-demo/releases)到`vendor`的对应目录下，如`vendor/win/x64`
+快速开始前请先阅读以下链接
+
+[Finclip桌面版Demo简介](https://github.com/finogeeks/finclip-desktop-demo/tree/master/examples)
 
 ## 快速开始
 
-环境准备就绪后, 双击finclip-win32-demo.sln, 在vs中即可运行
+环境准备就绪后, 双击finclip-desktop-demo.sln, 在vs中即可运行
 
 # 集成
 
 **注意：依赖包必须随缩主程序一同发布，并在独立目录中存放。**
 ### 第一步 引入头文件
 
-头文件: https://github.com/finogeeks/finclip-win32-demo/tree/master/src
+头文件: https://github.com/finogeeks/finclip-desktop-demo/tree/master/src
 
 ```c++
 #include "finclip_api.h" //引入头文件
