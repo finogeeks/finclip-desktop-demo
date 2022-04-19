@@ -4,7 +4,7 @@
 
  快速开始前请先阅读以下链接
 
-[Finclip桌面版Demo集成指引与功能介绍](https://github.com/finogeeks/finclip-desktop-demo/tree/master/examples)
+[Finclip桌面版Demo集成指引与功能介绍](https://github.com/finogeeks/finclip-desktop-demo/tree/master/examples/README.md)
 
 ## 快速开始
 
