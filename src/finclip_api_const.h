@@ -1,5 +1,3 @@
-#ifndef SRC_FINCLIP_API_CONST_H_
-#define SRC_FINCLIP_API_CONST_H_
 #ifndef WRAPPER_SRC_PUBLIC_FINCLIP_API_CONST_H_
 #define WRAPPER_SRC_PUBLIC_FINCLIP_API_CONST_H_
 
@@ -31,6 +29,22 @@ typedef struct objc_object* FINCLIP_WINDOW_HANDLE;
 extern "C" {
 #endif
 
+#define FINCLIP_CONFIG_APPSTORE "appstore"
+// appkey, secret, domain 从管理后台获取, 必填
+#define FINCLIP_CONFIG_APPKEY "appkey"
+#define FINCLIP_CONFIG_SECRET "secret"
+#define FINCLIP_CONFIG_DOMAIN "domain"
+//
+#define FINCLIP_CONFIG_WINDOW_STYLE "window_style"
+// 是否展示loading动画, 1: 展示, 0: 不展示
+#define FINCLIP_CONFIG_SHOW_LOADING "show_loading"
+// windows: finclip.exe位置, 默认为 ./finclip, 即当前目录下的finclip文件夹
+// macos: finclip.app的位置, 默认为
+#define FINCLIP_CONFIG_EXE_PATH "exe_path"
+// finclip.exe位置, 默认到当前目录的finclip文件夹下找
+#define FINCLIP_CONFIG_PAGE_PATH "page_path"
+// 启动参数, 值为序列化后的json
+#define FINCLIP_CONFIG_START_PARAMS "start_params"
 /**
  * @brief 启动机制设置
  * kAsync: 异步启动
@@ -48,22 +62,19 @@ enum StartFlags {
  *
  */
 typedef enum { kApplet, kWebView } FinClipApiType;
-
 /**
- * @brief 自定义api返回值回调
+ * @brief 调用h5方法后的返回值回调
  *
  */
-typedef void (*FinclipApiCallback)(const char* res);
+typedef void (*FinclipApiCallback)(const char* res, void* input);
 
 /**
  * @brief 自定义api
  *
  */
 typedef void (*FinclipApiHandle)(const char* event, const char* param,
-                                 FinclipApiCallback callback);
+                                 void* input, void* res);
 #ifdef __cplusplus
 }
 #endif
 #endif /* WRAPPER_SRC_PUBLIC_FINCLIP_API_CONST_H_ */
-
-#endif /* SRC_FINCLIP_API_CONST_H_ */

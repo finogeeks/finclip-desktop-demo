@@ -17,29 +17,30 @@ typedef struct IKnown IKnown;
 typedef struct IResultSet IResultSet;
 typedef struct IEvent IEvent;
 typedef struct IFinPacker IFinPacker;
-typedef struct IFinConfig IFinConfig;
+typedef struct FinclipParams FinclipParams;
 typedef struct IFinConfigPacker IFinConfigPacker;
 typedef struct IPackerFactory IPackerFactory;
-typedef struct Callback Callback;
+typedef struct FinclipCallback FinclipCallback;
 typedef void (*FinClipSDKCallback)(IEvent*);
 
 /**
- * @brief
+ * @brief SDK初始化
  */
 DLL_EXPORT int FINSTDMETHODCALLTYPE
 finclip_initialize(IFinConfigPacker* configpacker);
+
 /**
- * @brief
+ * @brief 获取配置工厂
  */
 DLL_EXPORT IPackerFactory* FINSTDMETHODCALLTYPE finclip_get_packer_factory();
 
 /**
- * @brief
+ * @brief 启动
  */
-DLL_EXPORT int FINSTDMETHODCALLTYPE finclip_start_applet(int appstore,
+DLL_EXPORT int FINSTDMETHODCALLTYPE finclip_start_applet(const char* appstore,
                                                          const char* appid);
 /**
- * @brief
+ * @brief 关闭所有小程序
  */
 DLL_EXPORT int FINSTDMETHODCALLTYPE finclip_close_all_applet();
 
@@ -49,8 +50,7 @@ DLL_EXPORT int FINSTDMETHODCALLTYPE finclip_close_all_applet();
 DLL_EXPORT int FINSTDMETHODCALLTYPE finclip_close_applet(const char* appid);
 
 /**
- * @brief 设置小程序主程序位置
- * 需要设置
+ * @brief 设置小程序窗口位置
  *
  */
 DLL_EXPORT void FINSTDMETHODCALLTYPE finclip_set_position(const char* appid,
@@ -65,107 +65,73 @@ DLL_EXPORT IFinConfigPacker* FINSTDMETHODCALLTYPE
 finclip_packer_factory_get_config_packer(IPackerFactory* factory);
 
 /**
- * @brief
+ * @brief 新建配置
  */
-DLL_EXPORT IFinConfig* FINSTDMETHODCALLTYPE
+DLL_EXPORT FinclipParams* FINSTDMETHODCALLTYPE
 finclip_config_packer_new_config(IFinConfigPacker* packer);
 
 /**
- * @brief
+ * @brief 获取配置, 如果获取失败, 则返回NULL
  */
-DLL_EXPORT IFinConfig* FINSTDMETHODCALLTYPE
-finclip_config_packer_get_config(IFinConfigPacker* packer, int appstore);
+DLL_EXPORT FinclipParams* FINSTDMETHODCALLTYPE
+finclip_config_packer_get_config(IFinConfigPacker* packer, char* appstore);
 
 /**
- * @brief
+ * @brief 增加配置
  */
-DLL_EXPORT int FINSTDMETHODCALLTYPE
-finclip_config_packer_add_config(IFinConfigPacker* packer, IFinConfig* config);
+DLL_EXPORT int FINSTDMETHODCALLTYPE finclip_config_packer_add_config(
+    IFinConfigPacker* packer, FinclipParams* config);
 
 /**
- * @brief
+ * @brief 注册自定义api, 供小程序或h5调用
+ * @param packer
+ * @param type 类型, 区分h5与小程序
+ * @param apis api名称
+ * @param handle 处理函数
+ * @param input 自定义参数, 透传给handle
  */
 DLL_EXPORT void FINSTDMETHODCALLTYPE
-finclip_register_callback(IFinConfigPacker* packer, FinClipApiType type,
-                          const char* apis, FinclipApiHandle handle);
+finclip_register_api(IFinConfigPacker* packer, FinClipApiType type,
+                     const char* apis, FinclipApiHandle handle, void* input);
 
 /**
- * @brief
+ * @brief 创建启动参数
  */
-DLL_EXPORT void FINSTDMETHODCALLTYPE
-finclip_config_set_app_store(IFinConfig* config, int app_store);
+DLL_EXPORT FinclipParams* FINSTDMETHODCALLTYPE finclip_create_params();
 
 /**
- * @brief
+ * @brief 销毁启动参数
  */
 DLL_EXPORT void FINSTDMETHODCALLTYPE
-finclip_config_set_app_key(IFinConfig* config, const char* app_key);
+finclip_destory_params(FinclipParams* params);
 
 /**
- * @brief
+ * @brief 设置启动参数
  */
-DLL_EXPORT void FINSTDMETHODCALLTYPE
-finclip_config_set_secret(IFinConfig* config, const char* secret);
-
+DLL_EXPORT void FINSTDMETHODCALLTYPE finclip_params_set(FinclipParams* params,
+                                                        const char* key,
+                                                        const char* value);
 /**
- * @brief
+ * @brief 根据key删除启动启动参数
  */
-DLL_EXPORT void FINSTDMETHODCALLTYPE
-finclip_config_set_domain(IFinConfig* config, const char* domain);
-
-/**
- * @brief
- */
-DLL_EXPORT void FINSTDMETHODCALLTYPE
-finclip_config_set_app_window_style(IFinConfig* config, int type);
-
-/**
- * @brief 设置启动模式, 参见: StartFlags
- * 全同步模式: kBaseLibrarySync | kAppletSync
- */
-DLL_EXPORT void FINSTDMETHODCALLTYPE
-finclip_config_set_start_flag(IFinConfig* config, int flag);
-
-/**
- * @brief 是否展示loading动画
- */
-DLL_EXPORT void FINSTDMETHODCALLTYPE
-finclip_config_set_show_loading(IFinConfig* config, bool show_loading);
-
-/**
- * @brief 设置小程序主程序执行文件的位置, 当宿主程序和exe不在同一目录时,
- * 需要设置
- *
- */
-DLL_EXPORT void FINSTDMETHODCALLTYPE
-finclip_config_set_exe_path(IFinConfig* config, const char* exe_path);
+DLL_EXPORT void FINSTDMETHODCALLTYPE finclip_params_del(FinclipParams* params,
+                                                        const char* key);
 
 #ifdef _WIN32
 /**
  * @brief
  */
-DLL_EXPORT int FINSTDMETHODCALLTYPE
-finclip_start_applet_embed(int appstore, const char* appid, HWND container);
+DLL_EXPORT int FINSTDMETHODCALLTYPE finclip_start_applet_embed(
+    const char* appstore, const char* appid, HWND container);
+
+DLL_EXPORT int FINSTDMETHODCALLTYPE finclip_embed_applet(const char* appstore,
+                                                         const char* appid,
+                                                         HWND container);
 #endif
 
-#ifdef __cplusplus
-
-/**
- * @brief
- */
-DLL_EXPORT void FINSTDMETHODCALLTYPE
-finclip_register_callback_cpp(IFinConfigPacker* packer, FinClipApiType type,
-                              const char* apis, Callback* callback);
-
-/**
- * @brief
- */
-DLL_EXPORT int FINSTDMETHODCALLTYPE finclip_invoke_api_cpp(FinClipApiType type,
-                                                           const char* app_id,
-                                                           const char* api_name,
-                                                           const char* params,
-                                                           Callback* callback);
-#endif
+DLL_EXPORT int FINSTDMETHODCALLTYPE finclip_invoke_api(
+    FinClipApiType type, const char* app_id, const char* api_name,
+    const char* params, FinclipApiCallback callback, void* input);
 
 #ifdef __cplusplus
 }

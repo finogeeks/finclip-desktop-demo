@@ -3,6 +3,8 @@ const os = require('os');
 const path = require('path');
 const finclip = require('finclip');
 
+let hwnd = 0;
+
 const createMainWindow = () => {
   const win = new BrowserWindow({
     width: 800,
@@ -12,6 +14,8 @@ const createMainWindow = () => {
     },
   });
   win.loadFile('../view/index.html');
+  const handleBuffer = win.getNativeWindowHandle();
+  hwnd = os.endianness() == 'LE' ? handleBuffer.readInt32LE() : handleBuffer.readInt32BE();
 };
 
 const openFinClipWindow = (arg) => {
@@ -25,6 +29,7 @@ const openFinClipWindow = (arg) => {
     handle: 0,
     finclipPath,
   });
+  console.log('hwnd', hwnd);
   console.log(result);
 };
 
