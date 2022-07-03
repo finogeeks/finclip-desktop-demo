@@ -61,6 +61,14 @@ Napi::String start(const Napi::CallbackInfo& info) {
   return Napi::String::New(env, "success");
 }
 
+Napi::String embed(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  Napi::Object args = info[0].ToObject();
+  int handle = args.Get("handle").ToNumber().Int32Value();
+  finclip_embed_applet(app_store, appid.c_str(), (HWND)handle);
+  return Napi::String::New(env, "success");
+}
+
 Napi::String close(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
   finclip_close_all_applet();
@@ -123,6 +131,8 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
               Napi::Function::New(env, setAppletPos));
   exports.Set(Napi::String::New(env, "createWindow"),
               Napi::Function::New(env, createWindow));
+  exports.Set(Napi::String::New(env, "embed"),
+              Napi::Function::New(env, embed));
   return exports;
 }
 

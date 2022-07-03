@@ -29,8 +29,10 @@ const openFinClipWindow = (arg) => {
     handle: 0,
     finclipPath,
   });
-  console.log('hwnd', hwnd);
-  console.log(result);
+};
+
+const embedFinClipWindow = () => {
+  finclip.embed({ handle: hwnd });
 };
 
 const closeFinClipWindow = () => {
@@ -40,6 +42,10 @@ const closeFinClipWindow = () => {
 
 ipcMain.on('OPEN_FINCLIP_WINDOW', (event, arg) => {
   openFinClipWindow(arg);
+});
+
+ipcMain.on('EMBED_FINCLIP_WINDOW', (event, arg) => {
+  embedFinClipWindow(arg);
 });
 
 ipcMain.on('CLOSE_FINCLIP_WINDOW', (event, arg) => {
