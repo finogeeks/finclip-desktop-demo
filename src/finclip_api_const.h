@@ -38,10 +38,10 @@ extern "C" {
 #define FINCLIP_CONFIG_WINDOW_STYLE "window_style"
 // 是否展示loading动画, 1: 展示, 0: 不展示
 #define FINCLIP_CONFIG_SHOW_LOADING "show_loading"
-// windows: finclip.exe位置, 默认为 ./finclip, 即当前目录下的finclip文件夹
-// macos: finclip.app的位置, 默认为
+// windows: finclip.exe位置, 默认为 ./finclip, 即当前目录下的finclip文件夹 
+// macos: finclip.app的位置, 默认为 
 #define FINCLIP_CONFIG_EXE_PATH "exe_path"
-// finclip.exe位置, 默认到当前目录的finclip文件夹下找
+// finclip.exe位置, 默认到当前目录的finclip文件夹下找 
 #define FINCLIP_CONFIG_PAGE_PATH "page_path"
 // 启动参数, 值为序列化后的json
 #define FINCLIP_CONFIG_START_PARAMS "start_params"

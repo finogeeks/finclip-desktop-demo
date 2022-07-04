@@ -43,7 +43,7 @@ Napi::String start(const Napi::CallbackInfo& info) {
   config = finclip_config_packer_get_config(packer, app_store);
   if (config == nullptr) config = finclip_create_params();
 
-  finclip_params_set(config, "exe_path", path.c_str());
+  finclip_params_set(config, FINCLIP_CONFIG_EXE_PATH, path.c_str());
   finclip_params_set(config, FINCLIP_CONFIG_APPSTORE, "1");
   finclip_params_set(config, FINCLIP_CONFIG_APPKEY, appkey.c_str());
   finclip_params_set(config, FINCLIP_CONFIG_SECRET, secret.c_str());
