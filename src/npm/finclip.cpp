@@ -14,12 +14,9 @@
 #include <ostream>
 #include <sstream>
 
-#include "json.hpp"
-
 #pragma comment(lib, "FinClipSDKWrapper.lib")
 
 using namespace std;
-using json = nlohmann::json;
 
 namespace NodeFinClip {
 using namespace Napi;
