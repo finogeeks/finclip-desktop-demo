@@ -1,4 +1,4 @@
-#ifndef WRAPPER_SRC_PUBLIC_FINCLIP_API_H_
+﻿#ifndef WRAPPER_SRC_PUBLIC_FINCLIP_API_H_
 #define WRAPPER_SRC_PUBLIC_FINCLIP_API_H_
 
 #include "finclip_api_const.h"

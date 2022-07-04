@@ -1,4 +1,4 @@
-#ifndef FINCLIP_H
+﻿#ifndef FINCLIP_H
 #define FINCLIP_H
 
 #include "../finclip_api.h"

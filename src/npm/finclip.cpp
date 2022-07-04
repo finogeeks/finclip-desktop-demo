@@ -1,4 +1,4 @@
-#include "../finclip_api.h"
+﻿#include "../finclip_api.h"
 #include "./finclip.h"
 #include <windows.h>
 #include <napi.h>
