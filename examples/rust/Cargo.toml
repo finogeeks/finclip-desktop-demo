@@ -1,0 +1,13 @@
+[package]
+name = "rustdemo"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+serde = { version = "1.0.80", features = ["derive"] }
+serde_derive = "^1.0.59"
+serde_json = "1.0.0"
+fltk = { version = "^1.3", git = "https://github.com/fltk-rs/fltk-rs" }
+fltk-sys = { version = "^1.3", git = "https://github.com/fltk-rs/fltk-rs" }
