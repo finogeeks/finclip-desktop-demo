@@ -1,96 +1,35 @@
-#![allow(unused)]
-
+extern crate anyhow;
 extern crate serde;
 extern crate serde_json;
 
-use fltk::app::App;
+mod finclip;
+
+use anyhow::Result;
+use finclip::wrapper;
+use finclip::FinClipApiType;
 use fltk::dialog;
-use fltk::enums::Event;
-use fltk::{
-    app, button::Button, enums::Align, frame::Frame, prelude::*, text::*, window::Window,
-};
-use fltk_sys::dialog::*;
+use fltk::enums::{Align, Event};
+use fltk::window::Window;
+use fltk::{app, button::Button, frame::Frame, prelude::*, text::*};
 use serde_json::{json, Value};
-use std::borrow::{Borrow, BorrowMut};
-use std::cell::{Cell, RefCell, RefMut};
-use std::ffi::{CStr, CString};
+use std::collections::HashMap;
+use std::ffi::CStr;
 use std::fs;
-use std::os::raw::{c_char, c_int, c_void};
-use std::rc::Rc;
+use std::os::raw::{c_char, c_void};
 use std::sync::{Arc, Mutex};
 
-#[repr(C)]
-struct IPackerFactory;
-
-#[repr(C)]
-struct FinclipParams;
-
-#[repr(C)]
-struct IFinConfigPacker;
-
-type Callback = extern "C" fn(
-    event: *const c_char,
-    param: *const c_char,
-    input: *const c_void,
-    res: *mut c_void,
-);
-
-type FinclipApiCallback = extern "C" fn(res: *const c_char, input: *const c_void);
-
-#[allow(improper_ctypes)]
-#[link(name = "FinClipSDKWrapper")]
-extern "C" {
-    fn finclip_get_packer_factory() -> *mut IPackerFactory;
-    fn finclip_packer_factory_get_config_packer(
-        factory: *mut IPackerFactory,
-    ) -> *mut IFinConfigPacker;
-    fn finclip_initialize(configpacker: *mut IFinConfigPacker) -> c_int;
-    fn finclip_create_params() -> *mut FinclipParams;
-    fn finclip_destory_params(params: *mut FinclipParams);
-    fn finclip_params_set(params: *mut FinclipParams, key: *const c_char, value: *const c_char);
-    fn finclip_params_del(params: *mut FinclipParams, key: *const c_char);
-    fn finclip_config_packer_add_config(
-        packer: *mut IFinConfigPacker,
-        config: *mut FinclipParams,
-    ) -> c_int;
-    fn finclip_config_packer_new_config(packer: *mut IFinConfigPacker) -> *mut FinclipParams;
-    fn finclip_config_packer_get_config(
-        packer: *mut IFinConfigPacker,
-        appstore: *const c_char,
-    ) -> *mut FinclipParams;
-    fn finclip_set_position(
-        appid: *const c_char,
-        left: c_int,
-        top: c_int,
-        width: c_int,
-        height: c_int,
-    );
-    fn finclip_start_applet(appstore: *const c_char, appid: *const c_char) -> c_int;
-    fn finclip_register_api(
-        packer: *mut IFinConfigPacker,
-        typ: c_int,
-        apis: *const c_char,
-        handle: Callback,
-        input: *mut c_void,
-    );
-    fn finclip_invoke_api(
-        typ: c_int,
-        app_id: *const c_char,
-        api_name: *const c_char,
-        params: *const c_char,
-        callback: FinclipApiCallback,
-        input: *mut c_void,
-    ) -> c_int;
-    fn finclip_close_applet(appid: *const c_char) -> c_int;
-    fn finclip_close_all_applet() -> c_int;
-}
-
-extern "C" fn web_api_callback(res: *const c_char, input: *const c_void) {
+extern "C" fn web_api_callback(res: *const c_char, input: *mut c_void) {
     unsafe {
+        let appid = {
+            let data = &*(input as *mut Arc<Mutex<WinElem>>);
+            let mut d = data.lock().unwrap();
+            d.btn_call.set_label("调用自定义api成功");
+            d.appid.buffer().unwrap().text()
+        };
         println!(
             ">> web_api_callback {} {}",
             CStr::from_ptr(res).to_str().unwrap(),
-            input as c_int
+            appid,
         );
     }
 }
@@ -98,15 +37,16 @@ extern "C" fn web_api_callback(res: *const c_char, input: *const c_void) {
 extern "C" fn web_api_example(
     event: *const c_char,
     param: *const c_char,
-    input: *const c_void,
+    input: *mut c_void,
     _res: *mut c_void,
 ) {
     unsafe {
+        let data = &*(input as *mut Arc<Mutex<WinElem>>);
         println!(
             ">> web_api_example {} {} {}",
             CStr::from_ptr(event).to_str().unwrap(),
             CStr::from_ptr(param).to_str().unwrap(),
-            input as c_int
+            data.lock().unwrap().appid.buffer().unwrap().text(),
         );
     }
 }
@@ -114,169 +54,132 @@ extern "C" fn web_api_example(
 extern "C" fn app_api_example(
     event: *const c_char,
     param: *const c_char,
-    input: *const c_void,
+    input: *mut c_void,
     _res: *mut c_void,
 ) {
     unsafe {
+        let data = &*(input as *mut Arc<Mutex<WinElem>>);
         println!(
             ">> app_api_example {} {} {}",
             CStr::from_ptr(event).to_str().unwrap(),
             CStr::from_ptr(param).to_str().unwrap(),
-            input as c_int
+            data.lock().unwrap().appid.buffer().unwrap().text(),
         );
     }
 }
 
-fn string_to_cstr(k: &String) -> CString {
-    let v = CString::new(k.as_bytes()).expect("CString::new failed");
-    return v;
-}
-
-fn str_to_cstr(k: &str) -> CString {
-    let v = CString::new(k.as_bytes()).expect("CString::new failed");
-    return v;
-}
-
-struct AppConfig {
-    appstore: String,
-    appkey: String,
-    secret: String,
-    domain: String,
-    appid: String,
-    exe_path: String,
-}
-
-fn start_normal(cfg: &AppConfig) {
-    unsafe {
-        let factory = finclip_get_packer_factory();
-        let packer = finclip_packer_factory_get_config_packer(factory);
-        println!("get config packer.");
-        let res1 = finclip_initialize(packer);
-        println!("initialize packer. result: {}", res1);
-        let config = finclip_create_params();
-        println!("create params.");
-        finclip_params_set(
-            config,
-            str_to_cstr("appstore").as_ptr(),
-            string_to_cstr(&cfg.appstore).as_ptr(),
-        );
-        finclip_params_set(
-            config,
-            str_to_cstr("appkey").as_ptr(),
-            string_to_cstr(&cfg.appkey).as_ptr(),
-        );
-        finclip_params_set(
-            config,
-            str_to_cstr("secret").as_ptr(),
-            string_to_cstr(&cfg.secret).as_ptr(),
-        );
-        finclip_params_set(
-            config,
-            str_to_cstr("domain").as_ptr(),
-            string_to_cstr(&cfg.domain).as_ptr(),
-        );
-        finclip_params_set(
-            config,
-            str_to_cstr("app_id").as_ptr(),
-            string_to_cstr(&cfg.appid).as_ptr(),
-        );
-        finclip_params_set(
-            config,
-            str_to_cstr("exe_path").as_ptr(),
-            string_to_cstr(&cfg.exe_path).as_ptr(),
-        );
-        println!("set params finished.");
-        finclip_register_api(
-            packer,
-            1,
-            str_to_cstr("test").as_ptr(),
-            web_api_example,
-            23 as *mut c_void,
-        );
-        finclip_register_api(
-            packer,
-            0,
-            str_to_cstr("test").as_ptr(),
-            app_api_example,
-            32 as *mut c_void,
-        );
-        let res2 = finclip_config_packer_add_config(packer, config);
-        println!("add config. result: {}", res2);
-        let res3 = finclip_start_applet(
-            string_to_cstr(&cfg.appstore).as_ptr(),
-            string_to_cstr(&cfg.appid).as_ptr(),
-        );
-        println!("start applet. result: {}", res3);
-    }
+fn start_normal(win_elems: Arc<Mutex<WinElem>>, cfg: &finclip::AppParams) -> Result<()> {
+    let factory = wrapper::get_packer_factory();
+    let packer = wrapper::packer_factory_get_config_packer(factory);
+    println!("get config packer.");
+    let cfg_ptr = &win_elems as *const _ as *mut c_void;
+    wrapper::register_api(
+        packer,
+        FinClipApiType::WebView,
+        "test",
+        web_api_example,
+        cfg_ptr,
+    )?;
+    wrapper::register_api(
+        packer,
+        FinClipApiType::Applet,
+        "test",
+        app_api_example,
+        cfg_ptr,
+    )?;
+    let res = wrapper::initialize(packer);
+    println!("initialize packer. result: {}", res);
+    let config = wrapper::create_params();
+    println!("create params.");
+    wrapper::applet_set_params(config, cfg)?;
+    println!("set params finished.");
+    let res = wrapper::config_packer_add_config(packer, config);
+    println!("add config. result: {}", res);
+    let res = wrapper::start_applet(cfg.appstore.as_str(), cfg.appid.as_str())?;
+    println!("start applet. result: {}", res);
+    Ok(())
 }
 
 fn close_all_applet() {
-    unsafe {
-        finclip_close_all_applet();
+    wrapper::close_all_applet();
+}
+
+fn call_api(win_elems: Arc<Mutex<WinElem>>, appid: String) -> Result<()> {
+    let cfg_ptr = &win_elems as *const _ as *mut c_void;
+    let res = wrapper::invoke_api(
+        FinClipApiType::WebView,
+        appid.as_str(),
+        "test",
+        r###"{"hello":"world"}"###,
+        web_api_callback,
+        cfg_ptr,
+    )?;
+    println!("invoke api. result: {}", res);
+    Ok(())
+}
+
+fn set_buffer(buf: Option<TextBuffer>, v: &Value) -> Option<()> {
+    buf?.set_text(v.as_str()?);
+    Some(())
+}
+
+fn set_buffer_str(buf: Option<TextBuffer>, txt: &str) -> Option<()> {
+    buf?.set_text(txt);
+    Some(())
+}
+
+fn center(w: i32, h: i32) -> (i32, i32) {
+    let screens = app::Screen::all_screens();
+    for s in screens {
+        if s.is_valid() {
+            return ((s.w() - w) / 2, (s.h() - h) / 2);
+        }
     }
-}
-
-fn call_api(appid: String) {
-    unsafe {
-        let res4 = finclip_invoke_api(
-            1,
-            string_to_cstr(&appid).as_ptr(),
-            str_to_cstr("test").as_ptr(),
-            str_to_cstr(r#"{"hello":"world"}"#).as_ptr(),
-            web_api_callback,
-            33 as *mut c_void,
-        );
-        println!("invoke api. result: {}", res4);
-    }
-}
-
-fn txt_buf(s: &str) -> TextBuffer {
-    let mut buf = TextBuffer::default();
-    buf.set_text(s);
-    buf
-}
-
-fn set_text_display(e: &TextDisplay, txt: &str) {
-    e.buffer().unwrap().set_text(txt);
+    (0, 0)
 }
 
 #[derive(Clone)]
 struct WinElem {
+    wind: Window,
     appid: TextEditor,
     appkey: TextEditor,
     secret: TextEditor,
     domain: TextEditor,
     exe: TextDisplay,
     param: TextEditor,
-    but_exe: Button,
-    but_start: Button,
-    but_close: Button,
-    but_call: Button,
+    btn_exe: Button,
+    btn_start: Button,
+    btn_close: Button,
+    btn_call: Button,
 }
 
 impl WinElem {
-    fn new() -> WinElem {
-        let mut wind = Window::new(0, 0, 655, 460, "rustdemo");
-        Frame::new(10, 10, 100, 20, "配置").with_align(Align::Left | Align::Inside);
-    
-        Frame::new(10, 42, 100, 20, "appid").with_align(Align::Left | Align::Inside);
-        Frame::new(10, 82, 100, 20, "appkey").with_align(Align::Left | Align::Inside);
-        Frame::new(10, 122, 100, 20, "secret").with_align(Align::Left | Align::Inside);
-        Frame::new(10, 162, 100, 20, "domain").with_align(Align::Left | Align::Inside);
-        Frame::new(10, 202, 100, 20, "可执行文件").with_align(Align::Left | Align::Inside);
-        Frame::new(10, 242, 100, 20, "参数").with_align(Align::Left | Align::Inside);
-        let mut ret = WinElem {
-            appid: TextEditor::new(110, 40, 540, 25, ""),
-            appkey: TextEditor::new(110, 80, 540, 25, ""),
-            secret: TextEditor::new(110, 120, 540, 25, ""),
-            domain: TextEditor::new(110, 160, 540, 25, ""),
-            exe: TextDisplay::new(110, 200, 440, 25, ""),
-            param: TextEditor::new(110, 240, 540, 170, ""),
-            but_exe: Button::new(550, 200, 100, 25, "设置app路径"),
-            but_start: Button::new(110, 420, 130, 25, "启动"),
-            but_close: Button::new(255, 420, 130, 25, "关闭所有小程序"),
-            but_call: Button::new(400, 420, 130, 25, "调用webview api"),
+    fn new() -> Result<WinElem> {
+        let wind = {
+            const SIZE: (i32, i32) = (655, 460);
+            let (x, y) = center(SIZE.0, SIZE.1);
+            Window::new(x, y, SIZE.0, SIZE.1, "rustdemo")
         };
+        let mut ret = WinElem {
+            wind,
+            appid: TextEditor::new(100, 40, 540, 25, ""),
+            appkey: TextEditor::new(100, 80, 540, 25, ""),
+            secret: TextEditor::new(100, 120, 540, 25, ""),
+            domain: TextEditor::new(100, 160, 540, 25, ""),
+            exe: TextDisplay::new(100, 200, 435, 25, ""),
+            param: TextEditor::new(100, 240, 540, 170, ""),
+            btn_exe: Button::new(540, 200, 100, 25, "设置app路径"),
+            btn_start: Button::new(100, 420, 130, 25, "启动"),
+            btn_close: Button::new(255, 420, 130, 25, "关闭所有小程序"),
+            btn_call: Button::new(400, 420, 130, 25, "调用webview api"),
+        };
+        let align = Align::Left | Align::Inside;
+        Frame::new(10, 42, 100, 20, "appid").with_align(align);
+        Frame::new(10, 82, 100, 20, "appkey").with_align(align);
+        Frame::new(10, 122, 100, 20, "secret").with_align(align);
+        Frame::new(10, 162, 100, 20, "domain").with_align(align);
+        Frame::new(10, 202, 100, 20, "可执行文件").with_align(align);
+        Frame::new(10, 242, 100, 20, "参数").with_align(align);
         ret.appid.set_scrollbar_align(Align::Clip);
         ret.appid.set_cursor_style(Cursor::Simple);
         ret.appkey.set_scrollbar_align(Align::Clip);
@@ -292,55 +195,113 @@ impl WinElem {
         ret.exe.set_buffer(TextBuffer::default());
         ret.param.set_buffer(TextBuffer::default());
 
-        ret.but_start.take_focus();
+        ret.btn_start.take_focus()?;
 
-        wind.end();
-        wind.show();
-        ret
+        let cb = move |t: &mut TextEditor, ev| match ev {
+            Event::Leave => {
+                t.buffer().unwrap().unselect();
+                true
+            }
+            Event::Enter => {
+                t.buffer().unwrap().select(0, t.buffer().unwrap().length());
+                t.take_focus().unwrap();
+                true
+            }
+            _ => false,
+        };
+        ret.appid.handle(cb);
+        ret.appkey.handle(cb);
+        ret.secret.handle(cb);
+        ret.domain.handle(cb);
+        ret.param.handle(move |t: &mut TextEditor, ev| match ev {
+            Event::Leave => {
+                t.buffer().unwrap().unselect();
+                true
+            }
+            Event::Enter => {
+                t.take_focus().unwrap();
+                true
+            }
+            _ => false,
+        });
+        ret.exe.handle(move |t, ev| match ev {
+            Event::Unfocus => {
+                t.buffer().unwrap().unselect();
+                true
+            }
+            _ => false,
+        });
+
+        ret.wind.end();
+        ret.wind.show();
+        Ok(ret)
     }
 
-    fn init(this: Arc<Mutex<Self>>) {
+    fn init(this: Arc<Mutex<Self>>) -> Result<()> {
         let elems = &mut this.lock().unwrap();
-
-        // elems.appid.handle({
-        //     let data = this.clone();
-        //     move |t, ev| match ev {
-        //         Event::Unfocus => {
-        //             let d = &data.lock().unwrap();
-        //             d.save_config();
-        //             true
-        //         },
-        //         _ => false,
-        //     }
-        // });
-        elems.but_start.set_callback({
+        elems.btn_start.set_callback({
             let data = this.clone();
             move |_| {
-                let d = &mut data.lock().unwrap();
-                let cfg = AppConfig {
-                    appstore: String::from("1"),
-                    appkey: d.appkey.buffer().unwrap().text(),
-                    secret: d.secret.buffer().unwrap().text(),
-                    domain: d.domain.buffer().unwrap().text(),
-                    appid: d.appid.buffer().unwrap().text(),
-                    exe_path: d.exe.buffer().unwrap().text(),
+                let (appid, appkey, secret, domain, exe, param) = {
+                    let d = &mut data.lock().unwrap();
+                    (
+                        d.appid.buffer(),
+                        d.appkey.buffer(),
+                        d.secret.buffer(),
+                        d.domain.buffer(),
+                        d.exe.buffer(),
+                        d.param.buffer(),
+                    )
                 };
-                start_normal(&cfg);
-            }
-        });
-        elems.but_close.set_callback(move |_| close_all_applet());
-        elems.but_call.set_callback({
-            let data = this.clone();
-            move |_| {
-                let d = &mut data.lock().unwrap();
-                call_api(d.appid.buffer().unwrap().text());
+                let text = param.unwrap().text();
+                let mut params: Value =
+                    serde_json::from_str(text.as_str()).unwrap_or_else(|_| json!({}));
+                if !params.is_object() {
+                    params = json!({});
+                }
+                let mut param_map = HashMap::new();
+                for (k, v) in params.as_object().unwrap() {
+                    if v.is_string() {
+                        param_map.insert(k.clone(), v.as_str().unwrap().to_string());
+                    }
+                }
+                start_normal(
+                    data.clone(),
+                    &finclip::AppParams {
+                        appstore: String::from("1"),
+                        appid: appid.unwrap().text(),
+                        appkey: appkey.unwrap().text(),
+                        secret: secret.unwrap().text(),
+                        domain: domain.unwrap().text(),
+                        exe_path: exe.unwrap().text(),
+                        show_loading: "0".to_string(),
+                        params: param_map,
+                    },
+                )
+                .unwrap();
             }
         });
 
-        elems.but_exe.set_callback({
+        elems.btn_close.set_callback(move |_| close_all_applet());
+
+        elems.btn_call.set_callback({
             let data = this.clone();
             move |_| {
-                let d = &mut data.lock().unwrap();
+                let txt = {
+                    let d = &mut data.lock().unwrap();
+                    d.appid.buffer().unwrap().text()
+                };
+                call_api(data.clone(), txt).unwrap();
+            }
+        });
+
+        elems.btn_exe.set_callback({
+            let data = this.clone();
+            move |_| {
+                let (x, y, buffer) = {
+                    let d = &mut data.lock().unwrap();
+                    (d.wind.x(), d.wind.y(), d.exe.buffer())
+                };
                 let mut chooser = dialog::FileChooser::new(
                     ".",
                     "*",
@@ -348,35 +309,36 @@ impl WinElem {
                     "设置app路径",
                 );
                 chooser.show();
-                chooser.window().set_pos(300, 300);
+                chooser.window().set_pos(x + 75, y + 50);
                 while chooser.shown() {
                     app::wait();
                 }
                 if chooser.value(1).is_none() {
                     return;
                 }
-                set_text_display(&d.exe, &chooser.value(1).unwrap());
-                d.save_config();
+                set_buffer_str(buffer, &chooser.value(1).unwrap());
             }
         });
 
-        elems.load_config();
+        elems.load_config()?;
+        Ok(())
     }
 
-    fn load_config(&mut self) {
-        let fd = fs::read_to_string("./config.json").unwrap_or_else(|_| "".to_string());
-        if (fd.len() > 0) {
-            let a: Value = serde_json::from_str(fd.as_str()).unwrap();
-            self.appid.set_buffer(txt_buf(a["app_id"].as_str().unwrap()));
-            self.appkey.set_buffer(txt_buf(a["appkey"].as_str().unwrap()));
-            self.secret.set_buffer(txt_buf(a["secret"].as_str().unwrap()));
-            self.domain.set_buffer(txt_buf(a["domain"].as_str().unwrap()));
-            self.exe.set_buffer(txt_buf(a["exe_path"].as_str().unwrap()));
-            self.param.set_buffer(txt_buf(a["params"].as_str().unwrap()));
+    fn load_config(&mut self) -> Result<()> {
+        let content = fs::read_to_string("./config.json").unwrap_or_else(|_| "".to_string());
+        if content.len() > 0 {
+            let a: Value = serde_json::from_str(content.as_str()).unwrap_or_else(|_| json!({}));
+            set_buffer(self.appid.buffer(), &a["app_id"]);
+            set_buffer(self.appkey.buffer(), &a["appkey"]);
+            set_buffer(self.secret.buffer(), &a["secret"]);
+            set_buffer(self.domain.buffer(), &a["domain"]);
+            set_buffer(self.exe.buffer(), &a["exe_path"]);
+            set_buffer(self.param.buffer(), &a["params"]);
         }
+        Ok(())
     }
 
-    fn save_config(&self) {
+    fn save_config(&self) -> Result<()> {
         let v = json!({
             "appstore": "1",
             "appkey": self.appkey.buffer().unwrap().text(),
@@ -386,15 +348,17 @@ impl WinElem {
             "exe_path": self.exe.buffer().unwrap().text(),
             "params": self.param.buffer().unwrap().text(),
         });
-        let s = serde_json::to_string(&v).unwrap();
-        fs::write("./config.json", s);
+        let s = serde_json::to_string(&v)?;
+        fs::write("./config.json", s)?;
+        Ok(())
     }
 }
 
-fn main() {
+fn main() -> Result<()> {
     let app = app::App::default();
-    let elems_arc = Arc::new(Mutex::new(WinElem::new()));
-    WinElem::init(elems_arc.clone());
-    app.run().unwrap();
-    elems_arc.lock().unwrap().save_config();
+    let elems_arc = Arc::new(Mutex::new(WinElem::new()?));
+    WinElem::init(elems_arc.clone())?;
+    app.run()?;
+    elems_arc.lock().unwrap().save_config()?;
+    Ok(())
 }
