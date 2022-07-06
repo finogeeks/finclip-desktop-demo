@@ -8,6 +8,10 @@ window.openFinClipWindow = () => {
   });
 };
 
+window.embedFinClipWindow = () => {
+  finclip.embed();
+};
+
 window.closeFinClipWindow = () => {
   finclip.close();
 };
