@@ -39,6 +39,8 @@ DLL_EXPORT IPackerFactory* FINSTDMETHODCALLTYPE finclip_get_packer_factory();
  */
 DLL_EXPORT int FINSTDMETHODCALLTYPE finclip_start_applet(const char* appstore,
                                                          const char* appid);
+DLL_EXPORT int FINSTDMETHODCALLTYPE finclip_start_applet_params(
+    const char* appstore, const char* appid, void* params);
 /**
  * @brief 关闭所有小程序
  */
@@ -118,21 +120,32 @@ DLL_EXPORT void FINSTDMETHODCALLTYPE finclip_params_del(FinclipParams* params,
                                                         const char* key);
 
 #ifdef _WIN32
-/**
- * @brief
- */
-DLL_EXPORT int FINSTDMETHODCALLTYPE finclip_start_applet_embed(
-    const char* appstore, const char* appid, HWND container);
-
 DLL_EXPORT int FINSTDMETHODCALLTYPE finclip_embed_applet(const char* appstore,
                                                          const char* appid,
                                                          HWND container);
+DLL_EXPORT int FINSTDMETHODCALLTYPE finclip_start_applet_embed(
+    const char* appstore, const char* appid, void* params, HWND container);
 #endif
 
+/**
+ * @brief 调用h5中的自定义api, 小程序不支持自定义api
+ */
 DLL_EXPORT int FINSTDMETHODCALLTYPE finclip_invoke_api(
     FinClipApiType type, const char* app_id, const char* api_name,
     const char* params, FinclipApiCallback callback, void* input);
 
+DLL_EXPORT int FINSTDMETHODCALLTYPE finclip_batch_app_info(
+    const char* app_id, const char* req_list, FinclipApiCallback callback);
+
+DLL_EXPORT int FINSTDMETHODCALLTYPE finclip_search_app(
+    const char* app_id, const char* search_text, FinclipApiCallback callback);
+
+/**
+ * @brief 回调函数设置返回值
+ */
+DLL_EXPORT int FINSTDMETHODCALLTYPE finclip_callback_res(const char* app_id,
+                                                         int callback_id,
+                                                         void* result);
 #ifdef __cplusplus
 }
 #endif

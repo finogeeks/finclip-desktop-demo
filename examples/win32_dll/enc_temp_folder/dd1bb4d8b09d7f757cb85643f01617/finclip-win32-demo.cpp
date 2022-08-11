@@ -16,6 +16,7 @@
 #include <iostream>
 #include <sstream>
 
+#include "finclip-win32-demo.h"
 #include "json.hpp"
 
 #define MAX_LOADSTRING 100
@@ -40,6 +41,7 @@ HWND hWnd_applet;
 BOOL is_initialized = FALSE;
 std::string offline_base_path;
 std::string offline_applet_path;
+HINSTANCE dll;
 
 std::string Utf8Encode(const std::wstring& wstr, int cp = CP_UTF8) {
   if (wstr.empty()) return std::string();
@@ -133,16 +135,6 @@ ATOM MyRegisterClass1(HINSTANCE hInstance) {
   return RegisterClassExW(&wcex);
 }
 
-//
-//   FUNCTION: InitInstance(HINSTANCE, int)
-//
-//   PURPOSE: Saves instance handle and creates main window
-//
-//   COMMENTS:
-//
-//        In this function, we save the instance handle in a global variable and
-//        create and display the main program window.
-//
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow) {
   hInst = hInstance;  // Store instance handle in our global variable
   HWND hwnd =
@@ -165,53 +157,60 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow) {
   return TRUE;
 }
 
-void CustomApi(const char* event, const char* param,
-               FinclipApiCallback callback) {
-  std::string data = param;
-  std::string e = event;
-  std::string res = R"({"data":"ok"})";
-  callback(res.c_str());
-}
-
-void InitFinclipsdk(int app_store, const std::wstring& wappkey,
+void InitFinclipsdk(const std::string& app_store, const std::wstring& wappkey,
                     const std::wstring& wsecret, const std::wstring& wdomain) {
   if (is_initialized != 0) {
     return;
   }
+  dll = LoadLibrary(
+      LR"(C:\project\finclipsdk-desktop\build\wrapper\Debug\FinClipSDKWrapper.dll)");
+  if (dll == nullptr) {
+    return;
+  }
+  auto fin_get_packer_factory = reinterpret_cast<findll_get_packer_factory>(
+      GetProcAddress(dll, "finclip_get_packer_factory"));
+  auto fin_packer_factory_get_config_packer =
+      reinterpret_cast<findll_packer_factory_get_config_packer>(
+          GetProcAddress(dll, "finclip_packer_factory_get_config_packer"));
+  auto fin_config_packer_add_config =
+      reinterpret_cast<findll_config_packer_add_config>(
+          GetProcAddress(dll, "finclip_config_packer_add_config"));
+
+  auto fin_initialize = reinterpret_cast<findll_initialize>(
+      GetProcAddress(dll, "finclip_initialize"));
+  auto fin_start_applet = reinterpret_cast<findll_start_applet>(
+      GetProcAddress(dll, "finclip_start_applet"));
+  auto fin_register_api = reinterpret_cast<findll_register_api>(
+      GetProcAddress(dll, "finclip_register_api"));
+  auto fin_create_params = reinterpret_cast<findll_create_params>(
+      GetProcAddress(dll, "finclip_create_params"));
+  auto fin_destory_params = reinterpret_cast<findll_destory_params>(
+      GetProcAddress(dll, "finclip_destory_params"));
+  auto fin_params_set = reinterpret_cast<findll_params_set>(
+      GetProcAddress(dll, "finclip_params_set"));
 
   std::string appkey = Utf8Encode(wappkey);
   std::string secret = Utf8Encode(wsecret);
   std::string domain = Utf8Encode(wdomain);
 
-  auto* factory = finclip_get_packer_factory();
-  auto* packer = finclip_packer_factory_get_config_packer(factory);
-  auto* config = finclip_config_packer_new_config(packer);
-  finclip_config_packer_add_config(packer, config);
-  finclip_config_set_app_store(config, app_store);
-  finclip_config_set_app_key(config, appkey.c_str());
-  finclip_config_set_secret(config, secret.c_str());
-  finclip_config_set_domain(config, domain.c_str());
-  finclip_config_set_start_flag(config, kAppletSync);
-  finclip_config_set_show_loading(config, false);
-  finclip_register_callback(packer, kApplet, "api", CustomApi);
-  finclip_register_callback(packer, kWebView, "webapi", CustomApi);
+  auto* factory = fin_get_packer_factory();
+  auto* packer = fin_packer_factory_get_config_packer(factory);
+  fin_initialize(packer);
+  auto* config = fin_create_params();
+  fin_params_set(config, FINCLIP_CONFIG_APPSTORE, "1");
+  fin_params_set(config, FINCLIP_CONFIG_APPKEY, appkey.c_str());
+  fin_params_set(config, FINCLIP_CONFIG_SECRET, secret.c_str());
+  fin_params_set(config, FINCLIP_CONFIG_DOMAIN, domain.c_str());
+      std::string exe_path = R"(C:\Users\yx\Downloads\1.2.1-alpha-debug.73 (1)\finclip\FinClip.exe)";
+  fin_params_set(config, FINCLIP_CONFIG_EXE_PATH, exe_path.c_str());
 
-  finclip_initialize(packer);
+  fin_config_packer_add_config(packer, config);
+  // 启动
+  // fin_start_applet(app_store, appid.c_str(), nullptr);
+  //fin_destory_params(config);
   is_initialized = TRUE;
 }
 
-// void FinclipAppletCallback(IEvent* event) {
-//   std::string buffer = event->GetBuffer();
-//   if (event->IsEmpty() == 0) {
-//     const char* val = event->GetStr("hWnd");
-//     std::string s(val);
-//     hWnd_applet = (HWND)strtoul(s.c_str(), nullptr, 16);
-//   }
-//   event->Release();
-// }
-
-// window procedure
-// 定义窗口的行为
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
                          LPARAM lParam) {
   switch (message) {
@@ -261,7 +260,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         std::wstring wappid(appid);
         std::wstring wdomain(domain);
         std::wstring wtype(type);
-        int appstore = 1;
+        std::string appstore = "1";
         if (wappkey.length() == 0) {
           MessageBox(nullptr, L"无效的appKey", L"错误", 0);
           return 0;
@@ -283,7 +282,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
           return 0;
         }
         InitFinclipsdk(appstore, wappkey, wsecret, wdomain);
-        finclip_start_applet(appstore, Utf8Encode(wappid).c_str());
+        auto fin_start_applet = reinterpret_cast<findll_start_applet>(
+            GetProcAddress(dll, "finclip_start_applet"));
+        fin_start_applet(appstore.c_str(), Utf8Encode(wappid).c_str());
       }
       break;
     case WM_SIZE: {
