@@ -29,22 +29,36 @@ typedef struct objc_object* FINCLIP_WINDOW_HANDLE;
 extern "C" {
 #endif
 
+// Config: 小程序框架的配置信息
 #define FINCLIP_CONFIG_APPSTORE "appstore"
 // appkey, secret, domain 从管理后台获取, 必填
 #define FINCLIP_CONFIG_APPKEY "appkey"
 #define FINCLIP_CONFIG_SECRET "secret"
 #define FINCLIP_CONFIG_DOMAIN "domain"
-//
-#define FINCLIP_CONFIG_WINDOW_STYLE "window_style"
-// 是否展示loading动画, 1: 展示, 0: 不展示
-#define FINCLIP_CONFIG_SHOW_LOADING "show_loading"
-// windows: finclip.exe位置, 默认为 ./finclip, 即当前目录下的finclip文件夹 
-// macos: finclip.app的位置, 默认为 
+// windows: finclip.exe位置, 默认为 ./finclip, 即当前目录下的finclip文件夹
+// macos: finclip.app的位置, 默认为
 #define FINCLIP_CONFIG_EXE_PATH "exe_path"
-// finclip.exe位置, 默认到当前目录的finclip文件夹下找 
-#define FINCLIP_CONFIG_PAGE_PATH "page_path"
-// 启动参数, 值为序列化后的json
-#define FINCLIP_CONFIG_START_PARAMS "start_params"
+
+// Params: 每个小程序独立设置, 0: 独立模式, 1: 嵌入模式
+// 注意, 嵌入模式目前仅支持windows, 且必须调用finclip_embed_applet, 完成嵌入.
+#define FINCLIP_UI_CONFIG_WINDOW_TYPE "window_type"
+// 是否展示loading动画, 1: 展示, 0: 不展示
+#define FINCLIP_UI_CONFIG_SHOW_LOADING "show_loading"
+// 标题栏更多菜单设置, hidden: 隐藏, normal: 显示
+#define FINCLIP_UI_CONFIG_TITLE_BAR_MORE_BUTTON "title_bar_more_button"
+// 初始窗口高度
+#define FINCLIP_UI_CONFIG_WINDOW_HEIGHT "window_height"
+// 初始窗口宽度
+#define FINCLIP_UI_CONFIG_WINDOW_WIDTH "window_width"
+
+// 小程序首屏路径
+#define FINCLIP_PARAMS_PAGE_PATH "page_path"
+// 传给小程序的启动参数
+#define FINCLIP_PARAMS_START_PARAMS "start_params"
+// 启动设置, 可以设置是否同步更新小程序, 基础库等, 默认异步,
+// 参见下面的StartFlags
+#define FINCLIP_PARAMS_START_FLAG "start_flag"
+
 /**
  * @brief 启动机制设置
  * kAsync: 异步启动
@@ -73,7 +87,8 @@ typedef void (*FinclipApiCallback)(const char* res, void* input);
  *
  */
 typedef void (*FinclipApiHandle)(const char* event, const char* param,
-                                 void* input, void* res);
+                                 void* input, int callbackid);
+
 #ifdef __cplusplus
 }
 #endif

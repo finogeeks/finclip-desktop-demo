@@ -1,5 +1,5 @@
 ﻿#include "../finclip_api.h"
-#include "./finclip.h"
+#include "../finclip_api_const.h"
 #include <windows.h>
 #include <napi.h>
 #include <malloc.h>
@@ -46,11 +46,11 @@ Napi::String start(const Napi::CallbackInfo& info) {
   finclip_params_set(config, FINCLIP_CONFIG_SECRET, secret.c_str());
   finclip_params_set(config, FINCLIP_CONFIG_DOMAIN, domain.c_str());
   // 可选参数
-  finclip_params_set(config, FINCLIP_CONFIG_SHOW_LOADING, "0");
+  finclip_params_set(config, FINCLIP_UI_CONFIG_SHOW_LOADING, "0");
   finclip_config_packer_add_config(packer, config);
 
   if (handle) {
-    finclip_start_applet_embed(app_store, appid.c_str(), (HWND)handle);
+    // finclip_start_applet_embed(app_store, appid.c_str(), nullptr, (HWND)handle);
   } else {
     finclip_start_applet(app_store, appid.c_str());
   }
@@ -63,7 +63,7 @@ Napi::String embed(const Napi::CallbackInfo& info) {
   Napi::Object args = info[0].ToObject();
   int handle = args.Get("handle").ToNumber().Int32Value();
   finclip_embed_applet(app_store, appid.c_str(), (HWND)handle);
-  return Napi::String::New(env, "success");
+  return Napi::String::New(env, "embed success");
 }
 
 Napi::String close(const Napi::CallbackInfo& info) {
