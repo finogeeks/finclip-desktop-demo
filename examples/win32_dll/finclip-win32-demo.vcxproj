@@ -110,9 +110,6 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
-    <PostBuildEvent>
-      <Command>xcopy  /Y/E/H/C/I  $(SolutionDir)\..\..\vendor\win\x86\*  $(SolutionDir)build\bin\$(Platform)\$(Configuration)\ </Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -130,9 +127,6 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
-    <PostBuildEvent>
-      <Command>xcopy  /Y/E/H/C/I  $(SolutionDir)\..\..\vendor\win\x86\*  $(SolutionDir)build\bin\$(Platform)\$(Configuration)\ </Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -146,9 +140,6 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
-    <PostBuildEvent>
-      <Command>xcopy  /Y/E/H/C/I  $(SolutionDir)\..\..\vendor\win\x64\*  $(SolutionDir)build\bin\$(Platform)\$(Configuration)\ </Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -166,9 +157,6 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
-    <PostBuildEvent>
-      <Command>xcopy  /Y/E/H/C/I  $(SolutionDir)\..\..\vendor\win\x64\*  $(SolutionDir)build\bin\$(Platform)\$(Configuration)\ </Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="finclip-win32-demo.h" />

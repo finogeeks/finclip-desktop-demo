@@ -55,9 +55,6 @@ extern "C" {
 #define FINCLIP_PARAMS_PAGE_PATH "page_path"
 // 传给小程序的启动参数
 #define FINCLIP_PARAMS_START_PARAMS "start_params"
-// 启动设置, 可以设置是否同步更新小程序, 基础库等, 默认异步,
-// 参见下面的StartFlags
-#define FINCLIP_PARAMS_START_FLAG "start_flag"
 
 /**
  * @brief 启动机制设置

@@ -1,4 +1,4 @@
-#ifndef WRAPPER_SRC_PUBLIC_FINCLIP_API_H_
+﻿#ifndef WRAPPER_SRC_PUBLIC_FINCLIP_API_H_
 #define WRAPPER_SRC_PUBLIC_FINCLIP_API_H_
 
 #include "finclip_api_const.h"
@@ -134,13 +134,11 @@ DLL_EXPORT int FINSTDMETHODCALLTYPE finclip_invoke_api(
     FinClipApiType type, const char* app_id, const char* api_name,
     const char* params, FinclipApiCallback callback, void* input);
 
-DLL_EXPORT int FINSTDMETHODCALLTYPE
-finclip_batch_app_info(const char* app_id, const char* req_list,
-                       FinclipApiCallback callback, void* input);
+DLL_EXPORT int FINSTDMETHODCALLTYPE finclip_batch_app_info(
+    const char* app_id, const char* req_list, FinclipApiCallback callback);
 
-DLL_EXPORT int FINSTDMETHODCALLTYPE
-finclip_search_app(const char* app_id, const char* search_text,
-                   FinclipApiCallback callback, void* input);
+DLL_EXPORT int FINSTDMETHODCALLTYPE finclip_search_app(
+    const char* app_id, const char* search_text, FinclipApiCallback callback);
 
 /**
  * @brief 回调函数设置返回值
