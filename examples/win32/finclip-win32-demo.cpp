@@ -18,6 +18,8 @@
 
 #include "json.hpp"
 
+#include "finclip_api.h"
+
 #define MAX_LOADSTRING 100
 
 using namespace std;
@@ -40,6 +42,8 @@ HWND hWnd_applet;
 BOOL is_initialized = FALSE;
 std::string offline_base_path;
 std::string offline_applet_path;
+
+std::string gAppid;
 
 std::string Utf8Encode(const std::wstring& wstr, int cp = CP_UTF8) {
   if (wstr.empty()) return std::string();
@@ -166,14 +170,14 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow) {
 }
 
 void CustomApi(const char* event, const char* param,
-               FinclipApiCallback callback) {
+               void* input, int callbackid) {
   std::string data = param;
   std::string e = event;
   std::string res = R"({"data":"ok"})";
-  callback(res.c_str());
+  finclip_callback_res(gAppid.c_str(), callbackid, const_cast<char*>(res.c_str()));
 }
 
-void InitFinclipsdk(int app_store, const std::wstring& wappkey,
+void InitFinclipsdk(const char* app_store, const std::wstring& wappkey,
                     const std::wstring& wsecret, const std::wstring& wdomain) {
   if (is_initialized != 0) {
     return;
@@ -187,14 +191,14 @@ void InitFinclipsdk(int app_store, const std::wstring& wappkey,
   auto* packer = finclip_packer_factory_get_config_packer(factory);
   auto* config = finclip_config_packer_new_config(packer);
   finclip_config_packer_add_config(packer, config);
-  finclip_config_set_app_store(config, app_store);
-  finclip_config_set_app_key(config, appkey.c_str());
-  finclip_config_set_secret(config, secret.c_str());
-  finclip_config_set_domain(config, domain.c_str());
-  finclip_config_set_start_flag(config, kAppletSync);
-  finclip_config_set_show_loading(config, false);
-  finclip_register_callback(packer, kApplet, "api", CustomApi);
-  finclip_register_callback(packer, kWebView, "webapi", CustomApi);
+  finclip_params_set(config, "appstore", app_store);
+  finclip_params_set(config, "appkey", appkey.c_str());
+  finclip_params_set(config, "secret", secret.c_str());
+  finclip_params_set(config, "domain", domain.c_str());
+  finclip_params_set(config, "start_flag", "2"); // kAppletSync
+  finclip_params_set(config, "show_loading", "0");
+  finclip_register_api(packer, kApplet, "api", CustomApi, nullptr);
+  finclip_register_api(packer, kWebView, "webapi", CustomApi, nullptr);
 
   finclip_initialize(packer);
   is_initialized = TRUE;
@@ -261,7 +265,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         std::wstring wappid(appid);
         std::wstring wdomain(domain);
         std::wstring wtype(type);
-        int appstore = 1;
+        const char* appstore = "1";
         if (wappkey.length() == 0) {
           MessageBox(nullptr, L"无效的appKey", L"错误", 0);
           return 0;
@@ -283,7 +287,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
           return 0;
         }
         InitFinclipsdk(appstore, wappkey, wsecret, wdomain);
-        finclip_start_applet(appstore, Utf8Encode(wappid).c_str());
+        gAppid = Utf8Encode(wappid);
+        finclip_start_applet(appstore, gAppid.c_str());
       }
       break;
     case WM_SIZE: {
