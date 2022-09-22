@@ -53,13 +53,12 @@ static void add_callback(GtkWidget *widget, gpointer user_data) {
   IFinConfigPacker *packer = finclip_packer_factory_get_config_packer(factory);
   IFinConfig *config = finclip_config_packer_new_config(packer);
   finclip_config_set_app_store(config, 1);
-  finclip_config_set_app_key(config,
-                             "22LyZEib0gLTQdU3MUauAQVLIkNNhTSGIN42gXzlAsk=");
-  finclip_config_set_secret(config, "ae55433be2f62915");
-  finclip_config_set_domain(config, "https://finchat-mop-b.finogeeks.club");
+  finclip_config_set_app_key(config, "");
+  finclip_config_set_secret(config, "");
+  finclip_config_set_domain(config, "");
   finclip_config_packer_add_config(packer, config);
   finclip_initialize(packer);
-  finclip_start_applet(NULL, 1, "60e3c059949a5300014d0c07", "", NULL, "", NULL);
+  finclip_start_applet(NULL, 1, "", "", NULL, "", NULL);
 }
 
 /********************************************************* nameentry_callback */

@@ -31,13 +31,13 @@ def start_finclip():
     config = finclip.finclip_config_packer_new_config(packer)
     finclip.finclip_config_set_app_store(config, 1)
     finclip.finclip_config_set_app_key(config,
-                                       "22LyZEib0gLTQdU3MUauAQVLIkNNhTSGIN42gXzlAsk=")
-    finclip.finclip_config_set_secret(config, "ae55433be2f62915")
+                                       "")
+    finclip.finclip_config_set_secret(config, "")
     finclip.finclip_config_set_domain(
-        config, "https://finchat-mop-b.finogeeks.club")
+        config, "")
     if sys.platform == 'win32':
         finclip.finclip_config_set_value(
-            config, finclip.FINCLIP_CONFIG_EXE_PATH, "C:/project/finclipsdk-desktop/build/core/Debug/finclip.exe")
+            config, finclip.FINCLIP_CONFIG_EXE_PATH, "")
     finclip.finclip_config_packer_add_config(packer, config)
     # callback.thisown = 0
     finclip.finclip_register_callback_cpp(

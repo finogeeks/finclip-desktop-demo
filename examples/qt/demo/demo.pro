@@ -25,7 +25,7 @@ win32 {
         message("x86_64 build")
         ## Windows x64 (64bit) specific build here
         LIBS += "../../../vendor/win/x64/FinClipSDKWrapper.lib"
-        INCLUDEPATH += "../../../src"
+        INCLUDEPATH += "../../../vendor/win/x64"
         QMAKE_POST_LINK=robocopy ../../../vendor/win/x64 . /E
     } else {
         message("x86 build")

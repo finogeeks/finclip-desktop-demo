@@ -163,7 +163,7 @@ void InitFinclipsdk(const std::string& app_store, const std::wstring& wappkey,
     return;
   }
   dll = LoadLibrary(
-      LR"(C:\project\finclipsdk-desktop\build\wrapper\Debug\FinClipSDKWrapper.dll)");
+      LR"(C:\project\finclipsdk-desktop\build\wrapper\Release\FinClipSDKWrapper.dll)");
   if (dll == nullptr) {
     return;
   }
@@ -296,12 +296,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         GetWindowText(hWnd_type, type, 1023);
         std::wstring wtype(type);
         if (wtype == L"1") {
+          // 根据实际情况取出appid
           WCHAR appid[1024];
           GetWindowText(hWnd_appid, appid, 1023);
+          // 根据实际情况获取变化后的窗口大小
           RECT rect;
           GetClientRect(hWnd_container, &rect);
-          // SetAppletPos(Utf8Encode(std::wstring(appid)).c_str(), 0, 0,
-          //              rect.right - rect.left, rect.bottom - rect.top, true);
+          auto finclip_dll_set_position = reinterpret_cast<findll_set_position>(
+              GetProcAddress(dll, "finclip_set_position"));
+          finclip_dll_set_position(Utf8Encode(appid).c_str(), 0, 0,
+                                   rect.right - rect.left,
+                                   rect.bottom - rect.top);
         }
       }
       break;
@@ -344,10 +349,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
       MONITORINFO mi = {sizeof(mi)};
       if (!GetMonitorInfo(hmon, &mi)) return 0;
 
-      wstring domain(L"https://finchat-mop-b.finogeeks.club:443");
-      wstring appkey(L"22LyZEib0gLTQdU3MUauAQVLIkNNhTSGIN42gXzlAsk=");
-      wstring appid(L"60e3c059949a5300014d0c07");
-      wstring secret(L"ae55433be2f62915");
+      wstring domain(L"");
+      wstring appkey(L"");
+      wstring appid(L"");
+      wstring secret(L"");
 
       auto path = std::filesystem::current_path();
       if (std::filesystem::exists("config.json")) {

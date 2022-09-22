@@ -5,7 +5,7 @@
 选择对应的release包, 并解压至指定位置
 ```
 以win x64为例:
-[下载finclip二进制包](https://github.com/finogeeks/finclip-desktop-demo/releases)到`vendor`的对应目录下，如`vendor/win/x64`
+[下载finclip二进制包](https://www.finclip.com/downloads/)到`vendor`的对应目录下，如`vendor/win/x64`并解压
 ```
 
 

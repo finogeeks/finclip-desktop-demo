@@ -17,6 +17,9 @@ typedef int(FINSTDMETHODCALLTYPE *findll_initialize)(
     IFinConfigPacker *configpacker);
 typedef int(FINSTDMETHODCALLTYPE *findll_start_applet)(const char *appstore,
                                                        const char *appid);
+typedef int(FINSTDMETHODCALLTYPE *findll_set_position)(const char *appid,
+                                                       int left, int top,
+                                                       int width, int height);
 typedef int(FINSTDMETHODCALLTYPE *findll_invoke_api)(
     FinClipApiType type, const char *app_id, const char *api_name,
     const char *params, FinclipApiCallback callback, void *input);

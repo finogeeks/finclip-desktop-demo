@@ -346,10 +346,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
       MONITORINFO mi = {sizeof(mi)};
       if (!GetMonitorInfo(hmon, &mi)) return 0;
 
-      wstring domain(L"https://finchat-mop-b.finogeeks.club:443");
-      wstring appkey(L"22LyZEib0gLTQdU3MUauAQVLIkNNhTSGIN42gXzlAsk=");
-      wstring appid(L"60e3c059949a5300014d0c07");
-      wstring secret(L"ae55433be2f62915");
+      wstring domain(L"");
+      wstring appkey(L"");
+      wstring appid(L"");
+      wstring secret(L"");
 
       auto path = std::filesystem::current_path();
       if (std::filesystem::exists("config.json")) {
