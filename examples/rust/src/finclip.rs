@@ -94,6 +94,29 @@ extern "C" {
 
     #[allow(dead_code)]
     pub fn finclip_close_all_applet() -> c_int;
+
+    #[allow(dead_code)]
+    pub fn finclip_batch_app_info(
+        appid: *const c_char,
+        req_list: *const c_char,
+        callback: ApiCallback,
+        input: *mut c_void,
+    ) -> c_int;
+
+    #[allow(dead_code)]
+    pub fn finclip_search_app(
+        appid: *const c_char,
+        search_text: *const c_char,
+        callback: ApiCallback,
+        input: *mut c_void,
+    ) -> c_int;
+
+    #[allow(dead_code)]
+    pub fn finclip_callback_res(
+        appid: *const c_char,
+        callback_id: c_int,
+        result: *mut c_void,
+    ) -> c_int;
 }
 
 fn str_to_cstr(k: &str) -> Result<CString, NulError> {
@@ -176,7 +199,10 @@ pub mod wrapper {
 
     #[allow(dead_code)]
     pub fn params_del(params: *mut FinclipParams, key: &str) -> Result<(), NulError> {
-        unsafe { finclip_params_del(params, str_to_cstr(key)?.as_ptr()); Ok(()) }
+        unsafe {
+            finclip_params_del(params, str_to_cstr(key)?.as_ptr());
+            Ok(())
+        }
     }
 
     #[allow(dead_code)]
@@ -196,7 +222,7 @@ pub mod wrapper {
     pub fn config_packer_get_config(
         packer: *mut IFinConfigPacker,
         appstore: &str,
-    ) -> Result<*mut FinclipParams,NulError> {
+    ) -> Result<*mut FinclipParams, NulError> {
         unsafe {
             let ret = finclip_config_packer_get_config(packer, str_to_cstr(appstore)?.as_ptr());
             Ok(ret)
@@ -204,13 +230,28 @@ pub mod wrapper {
     }
 
     #[allow(dead_code)]
-    pub fn set_position(appid: &str, left: c_int, top: c_int, width: c_int, height: c_int)->Result<(),NulError> {
-        unsafe { finclip_set_position(str_to_cstr(appid)?.as_ptr(), left, top, width, height);Ok(()) }
+    pub fn set_position(
+        appid: &str,
+        left: c_int,
+        top: c_int,
+        width: c_int,
+        height: c_int,
+    ) -> Result<(), NulError> {
+        unsafe {
+            finclip_set_position(str_to_cstr(appid)?.as_ptr(), left, top, width, height);
+            Ok(())
+        }
     }
 
     #[allow(dead_code)]
-    pub fn start_applet(appstore: &str, appid: &str) -> Result<c_int,NulError> {
-        unsafe { let ret = finclip_start_applet(str_to_cstr(appstore)?.as_ptr(), str_to_cstr(appid)?.as_ptr());Ok(ret) }
+    pub fn start_applet(appstore: &str, appid: &str) -> Result<c_int, NulError> {
+        unsafe {
+            let ret = finclip_start_applet(
+                str_to_cstr(appstore)?.as_ptr(),
+                str_to_cstr(appid)?.as_ptr(),
+            );
+            Ok(ret)
+        }
     }
 
     #[allow(dead_code)]
@@ -220,7 +261,7 @@ pub mod wrapper {
         apis: &str,
         handle: ApiHandler,
         input: *mut c_void,
-    ) ->Result<(),NulError>{
+    ) -> Result<(), NulError> {
         unsafe {
             finclip_register_api(
                 packer,
@@ -241,7 +282,7 @@ pub mod wrapper {
         params: &str,
         callback: ApiCallback,
         input: *mut c_void,
-    ) -> Result<c_int,NulError> {
+    ) -> Result<c_int, NulError> {
         unsafe {
             let ret = finclip_invoke_api(
                 typ as c_int,
@@ -256,8 +297,11 @@ pub mod wrapper {
     }
 
     #[allow(dead_code)]
-    pub fn close_applet(appid: &str) -> Result<c_int,NulError> {
-        unsafe { let ret=finclip_close_applet(str_to_cstr(appid)?.as_ptr()); Ok(ret) }
+    pub fn close_applet(appid: &str) -> Result<c_int, NulError> {
+        unsafe {
+            let ret = finclip_close_applet(str_to_cstr(appid)?.as_ptr());
+            Ok(ret)
+        }
     }
 
     #[allow(dead_code)]
@@ -266,7 +310,7 @@ pub mod wrapper {
     }
 
     #[allow(dead_code)]
-    pub fn applet_set_params(params: *mut FinclipParams, from: &AppParams) -> Result<(),NulError> {
+    pub fn applet_set_params(params: *mut FinclipParams, from: &AppParams) -> Result<(), NulError> {
         for k in &from.params {
             params_set(params, k.0.as_str(), k.1.as_str())?;
         }
@@ -280,5 +324,57 @@ pub mod wrapper {
         }
         params_set(params, "show_loading", from.show_loading.as_str())?;
         Ok(())
+    }
+
+    #[allow(dead_code)]
+    pub fn batch_app_info(
+        appid: &str,
+        req_list: &str,
+        callback: ApiCallback,
+        input: *mut c_void,
+    ) -> Result<c_int, NulError> {
+        unsafe {
+            let ret = finclip_batch_app_info(
+                str_to_cstr(appid)?.as_ptr(),
+                str_to_cstr(req_list)?.as_ptr(),
+                callback,
+                input,
+            );
+            Ok(ret)
+        }
+    }
+
+    #[allow(dead_code)]
+    pub fn search_app(
+        appid: &str,
+        search_text: &str,
+        callback: ApiCallback,
+        input: *mut c_void,
+    ) -> Result<c_int, NulError> {
+        unsafe {
+            let ret = finclip_search_app(
+                str_to_cstr(appid)?.as_ptr(),
+                str_to_cstr(search_text)?.as_ptr(),
+                callback,
+                input,
+            );
+            Ok(ret)
+        }
+    }
+
+    #[allow(dead_code)]
+    pub fn callback_res(
+        appid: &str,
+        callback_id: c_int,
+        result: *mut FinclipParams,
+    ) -> Result<c_int, NulError> {
+        unsafe {
+            let ret = finclip_callback_res(
+                str_to_cstr(appid)?.as_ptr(),
+                callback_id,
+                result as *mut c_void,
+            );
+            Ok(ret)
+        }
     }
 }

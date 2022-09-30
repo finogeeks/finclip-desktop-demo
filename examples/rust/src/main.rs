@@ -5,7 +5,7 @@ extern crate serde_json;
 mod finclip;
 
 use anyhow::Result;
-use finclip::wrapper;
+use finclip::*;
 use finclip::FinClipApiType;
 use fltk::dialog;
 use fltk::enums::{Align, Event};
@@ -34,7 +34,7 @@ extern "C" fn web_api_callback(res: *const c_char, input: *mut c_void) {
     }
 }
 
-extern "C" fn web_api_example(
+extern "C" fn openapi_search(
     event: *const c_char,
     param: *const c_char,
     input: *mut c_void,
@@ -42,16 +42,23 @@ extern "C" fn web_api_example(
 ) {
     unsafe {
         let data = &*(input as *mut Arc<Mutex<WinElem>>);
+        let appid = {
+            let d = &mut data.lock().unwrap();
+            d.appid.buffer().unwrap().text()
+        };
+        wrapper::batch_app_info(&appid, 
+            "62f5c1e08f13e800017fa823,62f47da680b7ba0001de5701,62f47ce980b7ba0001de56fc,62f479dc80b7ba0001de56f8,62f625408f13e800017fa873",
+            batch_app_info_callback, input).unwrap();
         println!(
-            ">> web_api_example {} {} {}",
+            ">> openapi_search {} {} {}",
             CStr::from_ptr(event).to_str().unwrap(),
             CStr::from_ptr(param).to_str().unwrap(),
-            data.lock().unwrap().appid.buffer().unwrap().text(),
+            appid,
         );
     }
 }
 
-extern "C" fn app_api_example(
+extern "C" fn mock_login(
     event: *const c_char,
     param: *const c_char,
     input: *mut c_void,
@@ -68,6 +75,66 @@ extern "C" fn app_api_example(
     }
 }
 
+extern "C" fn navigate_to_mini_program(
+    event: *const c_char,
+    param: *const c_char,
+    input: *mut c_void,
+    _res: *mut c_void,
+) {
+    unsafe {
+        let data = &*(input as *mut Arc<Mutex<WinElem>>);
+        println!(
+            ">> app_api_example {} {} {}",
+            CStr::from_ptr(event).to_str().unwrap(),
+            CStr::from_ptr(param).to_str().unwrap(),
+            data.lock().unwrap().appid.buffer().unwrap().text(),
+        );
+    }
+}
+
+extern "C" fn get_domain(
+    event: *const c_char,
+    param: *const c_char,
+    input: *mut c_void,
+    _res: *mut c_void,
+) {
+    unsafe {
+        let data = &*(input as *mut Arc<Mutex<WinElem>>);
+        println!(
+            ">> app_api_example {} {} {}",
+            CStr::from_ptr(event).to_str().unwrap(),
+            CStr::from_ptr(param).to_str().unwrap(),
+            data.lock().unwrap().appid.buffer().unwrap().text(),
+        );
+    }
+}
+
+extern "C" fn batch_app_info_callback(res: *const c_char, input: *mut c_void) {
+    unsafe {
+        let data = &*(input as *mut Arc<Mutex<WinElem>>);
+        let appid = 
+            data.lock().unwrap().appid.buffer().unwrap().text();
+        
+        println!(
+            ">> batch_app_info_callback {}",
+            CStr::from_ptr(res).to_str().unwrap()
+        );
+        let result = wrapper::create_params();
+        wrapper::params_set(result, "data", CStr::from_ptr(res).to_str().unwrap()).unwrap();
+        //wrapper::callback_res(&appid, 0, result).unwrap(); //TODO:
+        wrapper::destory_params(result);
+    }
+}
+
+extern "C" fn search_app_callback(res: *const c_char, _input: *mut c_void) {
+    unsafe {
+        println!(
+            ">> search app {}",
+            CStr::from_ptr(res).to_str().unwrap()
+        );
+    }
+}
+
 fn start_normal(win_elems: Arc<Mutex<WinElem>>, cfg: &finclip::AppParams) -> Result<()> {
     let factory = wrapper::get_packer_factory();
     let packer = wrapper::packer_factory_get_config_packer(factory);
@@ -75,16 +142,30 @@ fn start_normal(win_elems: Arc<Mutex<WinElem>>, cfg: &finclip::AppParams) -> Res
     let cfg_ptr = &win_elems as *const _ as *mut c_void;
     wrapper::register_api(
         packer,
-        FinClipApiType::WebView,
-        "test",
-        web_api_example,
+        FinClipApiType::Applet,
+        "openapi_search",
+        openapi_search,
         cfg_ptr,
     )?;
     wrapper::register_api(
         packer,
         FinClipApiType::Applet,
-        "test",
-        app_api_example,
+        "mock_login",
+        mock_login,
+        cfg_ptr,
+    )?;
+    wrapper::register_api(
+        packer,
+        FinClipApiType::Applet,
+        "navigate_to_mini_program",
+        navigate_to_mini_program,
+        cfg_ptr,
+    )?;
+    wrapper::register_api(
+        packer,
+        FinClipApiType::Applet,
+        "get_domain",
+        get_domain,
         cfg_ptr,
     )?;
     let res = wrapper::initialize(packer);
@@ -151,12 +232,14 @@ struct WinElem {
     btn_start: Button,
     btn_close: Button,
     btn_call: Button,
+    btn_batch: Button,
+    btn_search: Button,
 }
 
 impl WinElem {
     fn new() -> Result<WinElem> {
         let wind = {
-            const SIZE: (i32, i32) = (655, 460);
+            const SIZE: (i32, i32) = (655, 490);
             let (x, y) = center(SIZE.0, SIZE.1);
             Window::new(x, y, SIZE.0, SIZE.1, "rustdemo")
         };
@@ -172,6 +255,8 @@ impl WinElem {
             btn_start: Button::new(100, 420, 130, 25, "启动"),
             btn_close: Button::new(255, 420, 130, 25, "关闭所有小程序"),
             btn_call: Button::new(400, 420, 130, 25, "调用webview api"),
+            btn_batch: Button::new(100, 455, 130, 25, "批量获取app"),
+            btn_search: Button::new(255, 455, 130, 25, "搜索app"),
         };
         let align = Align::Left | Align::Inside;
         Frame::new(10, 42, 100, 20, "appid").with_align(align);
@@ -317,6 +402,44 @@ impl WinElem {
                     return;
                 }
                 set_buffer_str(buffer, &chooser.value(1).unwrap());
+            }
+        });
+
+        elems.btn_batch.set_callback({
+            let data = this.clone();
+            move |_| {
+                let appid = {
+                    let d = &mut data.lock().unwrap();
+                    d.appid.buffer().unwrap().text()
+                };
+                let cfg_ptr = &data as *const _ as *mut c_void;
+                let res = wrapper::batch_app_info(
+                    appid.as_str(),
+                    "62f5c1e08f13e800017fa823,62f47da680b7ba0001de5701,62f47ce980b7ba0001de56fc,62f479dc80b7ba0001de56f8,62f625408f13e800017fa873",
+                    batch_app_info_callback,
+                    cfg_ptr,
+                )
+                .unwrap();
+                println!("batch app info. result: {}", res);
+            }
+        });
+
+        elems.btn_search.set_callback({
+            let data = this.clone();
+            move |_| {
+                let appid = {
+                    let d = &mut data.lock().unwrap();
+                    d.appid.buffer().unwrap().text()
+                };
+                let cfg_ptr = &data as *const _ as *mut c_void;
+                let res = wrapper::search_app(
+                    appid.as_str(),
+                    "实例",
+                    search_app_callback,
+                    cfg_ptr,
+                )
+                .unwrap();
+                println!("search app. result: {}", res);
             }
         });
 
