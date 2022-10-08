@@ -1,14 +1,20 @@
 const path = require('path');
-const finclip = require('./build/Release/_finclip.node');
-finclip.setDomain('https://finclip-testing.finogeeks.club');
-finclip.setAppkey('22LyZEib0gLTQdU3MUauAfJ/xujwNfM6OvvEqQyH4igA');
-finclip.setAppid('6152b5dbfcfb4e0001448e6e');
-finclip.setSecret('703b9026be3d6bc5');
+const finclip = require('./build/Release/finclip.node');
 const finclipPath = path.resolve(__dirname, '../../vendor/win/x64/finclip.exe');
-console.log('finclipPath', finclipPath);
-const result = finclip.start({
-  handle: 0,
-  finclipPath,
-});
-setTimeout(() => {
-}, 1000 * 60 * 60);
+
+const factory = finclip.finclip_get_packer_factory();
+const packer = finclip.finclip_packer_factory_get_config_packer(factory);
+finclip.finclip_initialize(packer);
+const config = finclip.finclip_create_params();
+finclip.finclip_params_set(config, "appstore", "1");
+finclip.finclip_params_set(config, "appkey", "22LyZEib0gLTQdU3MUauAfJ/xujwNfM6OvvEqQyH4igA");
+finclip.finclip_params_set(config, "secret", "703b9026be3d6bc5");
+finclip.finclip_params_set(config, "domain", "https://finclip-testing.finogeeks.club");
+finclip.finclip_params_set(config, "exe_path", finclipPath);
+finclip.finclip_config_packer_add_config(packer, config);
+finclip.finclip_params_set(config, "window_type", "1");
+finclip.finclip_register_lifecycle("6152b5dbfcfb4e0001448e6e", 1, console.log);
+finclip.finclip_start_applet("1", "6152b5dbfcfb4e0001448e6e");
+// finclip.finclip_start_applet_embed("1", "6152b5dbfcfb4e0001448e6e", config, 17962650);
+
+setTimeout(() => {}, 60 * 1000);

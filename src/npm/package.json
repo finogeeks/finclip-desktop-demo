@@ -2,7 +2,7 @@
   "name": "finclip",
   "version": "1.0.0",
   "description": "",
-  "main": "./_finclip.node",
+  "main": "./finclip.node",
   "scripts": {
     "configure": "node-gyp configure",
     "build": "node-gyp build",
