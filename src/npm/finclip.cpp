@@ -1,6 +1,7 @@
 ﻿#include "./finclip_api.h"
 #include "./finclip_api_const.h"
 #include <vector>
+#include <map>
 #include <napi.h>
 
 using namespace std;
@@ -93,26 +94,29 @@ Napi::Number FinclipStartAppletEmbed(const Napi::CallbackInfo& info) {
   int config_id = config_object.Get("id").ToNumber();
   auto *config = config_vector.at(config_id);
   Napi::Number hwnd_number = info[3].ToNumber();
-  HWND hwnd = (HWND)hwnd_number.Int32Value();
+  HWND hwnd = (HWND)hwnd_number.Int64Value();
   finclip_start_applet_embed(app_store.Utf8Value().c_str(), app_id.Utf8Value().c_str(), config, hwnd);
   auto result = Napi::Number::New(env, 0);
   return result;
 }
 
-Napi::ThreadSafeFunction threadSafeCallback;
+std::map<int, Napi::ThreadSafeFunction> lifecycleCallback;
 bool callbackWasSet = false;
 
 void LifecicleHandle(LifecycleType type, const char* appid, void* input) {
-  auto env = (Napi::Env&)input;
-  Napi::String napiMessageString = Napi::String::New(env, "Done");
-
-  auto callback = [napiMessageString](Napi::Env env,
-                                      Napi::Function jsCallback) {
-    jsCallback.Call({napiMessageString});
+  auto callback = [type](Napi::Env env,
+                     Napi::Function jsCallback) {
+    Napi::String napiMessageString = Napi::String::New(env, "Done1");
+    auto typ = Napi::Number::From(env, (int) type);
+    jsCallback.Call({napiMessageString, typ});
   };
 
-  threadSafeCallback.NonBlockingCall(callback);
-  threadSafeCallback.Release();
+  auto it = lifecycleCallback.find(type);
+  if (it != lifecycleCallback.end()) {
+    auto& threadSafeCallback = it->second;
+    threadSafeCallback.NonBlockingCall(callback);
+    threadSafeCallback.Release();
+  }
 }
 
 Napi::Number FinclipRegisterLifecycle(const Napi::CallbackInfo& info) {
@@ -120,8 +124,8 @@ Napi::Number FinclipRegisterLifecycle(const Napi::CallbackInfo& info) {
   Napi::String app_id = info[0].ToString();
   Napi::Number liftcycle = info[1].ToNumber();
   Napi::Function api_function = info[2].As<Napi::Function>();
-  
-  threadSafeCallback =
+
+  lifecycleCallback[liftcycle.Int32Value()] =
       Napi::ThreadSafeFunction::New(env, api_function, "Callback", 0, 1);
 
   finclip_register_lifecycle(app_id.Utf8Value().c_str(), (LifecycleType)liftcycle.Int32Value(), LifecicleHandle, env);
