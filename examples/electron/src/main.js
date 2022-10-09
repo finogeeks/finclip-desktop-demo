@@ -4,6 +4,8 @@ const path = require('path');
 const finclip = require('finclip');
 
 let hwnd = 0;
+let appid_ = "";
+let config_;
 
 const createMainWindow = () => {
   const win = new BrowserWindow({
@@ -20,19 +22,25 @@ const createMainWindow = () => {
 
 const openFinClipWindow = (arg) => {
   const { domain, appkey, appid, secret } = arg;
-  finclip.setDomain(domain);
-  finclip.setAppkey(appkey);
-  finclip.setAppid(appid);
-  finclip.setSecret(secret);
+  appid_ = appid;
+  const factory = finclip.finclip_get_packer_factory();
+  const packer = finclip.finclip_packer_factory_get_config_packer(factory);
+  finclip.finclip_initialize(packer);
+  const config = finclip.finclip_create_params();
+  finclip.finclip_params_set(config, "appstore", "1");
+  finclip.finclip_params_set(config, "appkey", appkey);
+  finclip.finclip_params_set(config, "secret", secret);
+  finclip.finclip_params_set(config, "domain", domain);
   const finclipPath = path.resolve(__dirname, '../../../vendor/win/x64/finclip.exe');
-  const result = finclip.start({
-    handle: 0,
-    finclipPath,
-  });
+  finclip.finclip_params_set(config, "exe_path", finclipPath);
+  finclip.finclip_config_packer_add_config(packer, config);
+  finclip.finclip_params_set(config, "window_type", "1");
+  config_ = config;
+  finclip.finclip_start_applet("1", appid);
 };
 
 const embedFinClipWindow = () => {
-  finclip.embed({ handle: hwnd });
+  finclip.finclip_start_applet_embed("1", appid_, config_, hwnd);
 };
 
 const closeFinClipWindow = () => {
