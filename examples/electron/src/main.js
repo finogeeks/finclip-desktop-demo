@@ -18,6 +18,7 @@ const createMainWindow = () => {
   win.loadFile('../view/index.html');
   const handleBuffer = win.getNativeWindowHandle();
   hwnd = os.endianness() == 'LE' ? handleBuffer.readInt32LE() : handleBuffer.readInt32BE();
+  console.log(hwnd);
 };
 
 const openFinClipWindow = (arg) => {

@@ -103,6 +103,49 @@ Napi::Number FinclipStartAppletEmbed(const Napi::CallbackInfo& info) {
   return result;
 }
 
+Napi::Number FinclipSetPosition(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  Napi::String app_id = info[0].ToString();
+  Napi::Number left = info[1].ToNumber();
+  Napi::Number top = info[2].ToNumber();
+  Napi::Number width = info[3].ToNumber();
+  Napi::Number height = info[4].ToNumber();
+  finclip_set_position(app_id.Utf8Value().c_str(), left.Int64Value(), top.Int64Value(), width.Int64Value(), height.Int64Value());
+  auto result = Napi::Number::New(env, 0);
+  return result;
+}
+
+Napi::Number FinclipCloseApplet(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  Napi::String app_id = info[0].ToString();
+  finclip_close_applet(app_id.Utf8Value().c_str());
+  auto result = Napi::Number::New(env, 0);
+  return result;
+}
+
+Napi::Number FinclipCloseAllApplet(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  finclip_close_all_applet();
+  auto result = Napi::Number::New(env, 0);
+  return result;
+}
+
+Napi::Number FinclipHideApplet(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  Napi::String app_id = info[0].ToString();
+  finclip_hide_applet(app_id.Utf8Value().c_str());
+  auto result = Napi::Number::New(env, 0);
+  return result;
+}
+
+Napi::Number FinclipShowApplet(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  Napi::String app_id = info[0].ToString();
+  finclip_show_applet(app_id.Utf8Value().c_str());
+  auto result = Napi::Number::New(env, 0);
+  return result;
+}
+
 void LifecicleHandle(LifecycleType type, const char* appid, void* input) {
   auto callback = [type](Napi::Env env,
                      Napi::Function jsCallback) {
@@ -151,6 +194,12 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports.Set(Napi::String::New(env, "finclip_config_packer_add_config"), Napi::Function::New(env, FinclipConfigPackerAddConfig));
   exports.Set(Napi::String::New(env, "finclip_start_applet"), Napi::Function::New(env, FinclipStartApplet));
   exports.Set(Napi::String::New(env, "finclip_start_applet_embed"), Napi::Function::New(env, FinclipStartAppletEmbed));
+  exports.Set(Napi::String::New(env, "finclip_set_position"), Napi::Function::New(env, FinclipSetPosition));
+  exports.Set(Napi::String::New(env, "finclip_close_applet"), Napi::Function::New(env, FinclipCloseApplet));
+  exports.Set(Napi::String::New(env, "finclip_close_all_applet"), Napi::Function::New(env, FinclipCloseAllApplet));
+  exports.Set(Napi::String::New(env, "finclip_hide_applet"), Napi::Function::New(env, FinclipHideApplet));
+  exports.Set(Napi::String::New(env, "finclip_show_applet"), Napi::Function::New(env, FinclipShowApplet));
+  
   exports.Set(Napi::String::New(env, "finclip_register_lifecycle"), Napi::Function::New(env, FinclipRegisterLifecycle));
 
   return exports;
