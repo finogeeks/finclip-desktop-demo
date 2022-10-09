@@ -13,7 +13,7 @@ finclip.finclip_params_set(config, "domain", "https://finclip-testing.finogeeks.
 finclip.finclip_params_set(config, "exe_path", finclipPath);
 finclip.finclip_config_packer_add_config(packer, config);
 finclip.finclip_params_set(config, "window_type", "1");
-finclip.finclip_register_lifecycle("6152b5dbfcfb4e0001448e6e", 1, console.log);
+finclip.finclip_register_lifecycle("6152b5dbfcfb4e0001448e6e", 1, console.log, {a:1});
 finclip.finclip_start_applet("1", "6152b5dbfcfb4e0001448e6e");
 // finclip.finclip_start_applet_embed("1", "6152b5dbfcfb4e0001448e6e", config, 17962650);
 
