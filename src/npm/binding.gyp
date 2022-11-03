@@ -1,7 +1,7 @@
 {
     "targets": [
         {
-            "target_name": "_finclip",
+            "target_name": "finclip",
             "win_delay_load_hook": "true",
             "sources": [
                 "finclip.cpp"
@@ -12,15 +12,15 @@
             'include_dirs': ["<!@(node -p \"require('node-addon-api').include\")"],
             'dependencies': ["<!(node -p \"require('node-addon-api').gyp\")"],
             "libraries": [
-                "../../../vendor/win/x64/FinClipSDKWrapper.lib",
+                "../FinClipSDKWrapper.lib",
             ],
             "defines": ["_UNICODE", "UNICODE", "NAPI_DISABLE_CPP_EXCEPTIONS"],
             "copies": [
                 {
                     "destination": "<(module_root_dir)/build/Release/",
                     "files": [
-                        "../../vendor/win/x64/FinClipSDKWrapper.lib",
-                        "../../vendor/win/x64/FinClipSDKWrapper.dll",
+                        "./FinClipSDKWrapper.lib",
+                        "./FinClipSDKWrapper.dll",
                         "../../vendor/win/x64/finclip.exe",
                         "../../vendor/win/x64/finclip.exp",
                         "../../vendor/win/x64/finclip.lib",
