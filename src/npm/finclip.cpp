@@ -99,6 +99,25 @@ Napi::Number FinclipStartAppletEmbed(const Napi::CallbackInfo& info) {
   Napi::Number hwnd_number = info[3].ToNumber();
   HWND hwnd = (HWND)hwnd_number.Int64Value();
   finclip_start_applet_embed(app_store.Utf8Value().c_str(), app_id.Utf8Value().c_str(), config, hwnd);
+  auto style = GetWindowLongPtrA(hwnd, GWL_STYLE);
+  if (!(style & WS_CLIPCHILDREN)) {
+    SetWindowLongPtrA(hwnd, GWL_STYLE, style ^ WS_CLIPCHILDREN ^ WS_CLIPSIBLINGS);
+  }
+  auto result = Napi::Number::New(env, 0);
+  return result;
+}
+
+Napi::Number FinclipEmbedApplet(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  Napi::String app_store = info[0].ToString();
+  Napi::String app_id = info[1].ToString();
+  Napi::Number hwnd_number = info[2].ToNumber();
+  HWND hwnd = (HWND)hwnd_number.Int64Value();
+  finclip_embed_applet(app_store.Utf8Value().c_str(), app_id.Utf8Value().c_str(), hwnd);
+  auto style = GetWindowLongPtrA(hwnd, GWL_STYLE);
+  if (!(style & WS_CLIPCHILDREN)) {
+    SetWindowLongPtrA(hwnd, GWL_STYLE, style ^ WS_CLIPCHILDREN ^ WS_CLIPSIBLINGS);
+  }
   auto result = Napi::Number::New(env, 0);
   return result;
 }
@@ -194,14 +213,14 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports.Set(Napi::String::New(env, "finclip_config_packer_add_config"), Napi::Function::New(env, FinclipConfigPackerAddConfig));
   exports.Set(Napi::String::New(env, "finclip_start_applet"), Napi::Function::New(env, FinclipStartApplet));
   exports.Set(Napi::String::New(env, "finclip_start_applet_embed"), Napi::Function::New(env, FinclipStartAppletEmbed));
+  exports.Set(Napi::String::New(env, "finclip_embed_applet"), Napi::Function::New(env, FinclipEmbedApplet));
   exports.Set(Napi::String::New(env, "finclip_set_position"), Napi::Function::New(env, FinclipSetPosition));
   exports.Set(Napi::String::New(env, "finclip_close_applet"), Napi::Function::New(env, FinclipCloseApplet));
   exports.Set(Napi::String::New(env, "finclip_close_all_applet"), Napi::Function::New(env, FinclipCloseAllApplet));
   exports.Set(Napi::String::New(env, "finclip_hide_applet"), Napi::Function::New(env, FinclipHideApplet));
   exports.Set(Napi::String::New(env, "finclip_show_applet"), Napi::Function::New(env, FinclipShowApplet));
-  
   exports.Set(Napi::String::New(env, "finclip_register_lifecycle"), Napi::Function::New(env, FinclipRegisterLifecycle));
-
+  
   return exports;
 }
 
