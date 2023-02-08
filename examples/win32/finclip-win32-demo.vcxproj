@@ -86,8 +86,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>vendor\finclip\include;$(IncludePath)</IncludePath>
-    <LibraryPath>vendor\finclip\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)\..\..\vendor\win\x64;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)\..\..\vendor\win\x64;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)build\bin\$(Platform)\$(Configuration)</OutDir>
     <IntDir>$(SolutionDir)build\obj\$(Platform)\$(Configuration)\$(ProjectName)</IntDir>
   </PropertyGroup>
@@ -145,6 +145,8 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(SolutionDir)\..\..\vendor\win\x64\FinClipSDKWrapper.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy  /Y/E/H/C/I  $(SolutionDir)\..\..\vendor\win\x64\*  $(SolutionDir)build\bin\$(Platform)\$(Configuration)\ </Command>

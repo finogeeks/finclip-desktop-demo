@@ -174,7 +174,8 @@ void CustomApi(const char* event, const char* param,
   std::string data = param;
   std::string e = event;
   std::string res = R"({"data":"ok"})";
-  finclip_callback_res(gAppid.c_str(), callbackid, const_cast<char*>(res.c_str()));
+  // finclip_callback_res(gAppid.c_str(), callbackid,
+  // const_cast<char*>(res.c_str()));
 }
 
 void InitFinclipsdk(const char* app_store, const std::wstring& wappkey,
@@ -187,20 +188,15 @@ void InitFinclipsdk(const char* app_store, const std::wstring& wappkey,
   std::string secret = Utf8Encode(wsecret);
   std::string domain = Utf8Encode(wdomain);
 
-  auto* factory = finclip_get_packer_factory();
-  auto* packer = finclip_packer_factory_get_config_packer(factory);
-  auto* config = finclip_config_packer_new_config(packer);
-  finclip_config_packer_add_config(packer, config);
+  FinclipParams* config = finclip_create_params();
   finclip_params_set(config, "appstore", app_store);
   finclip_params_set(config, "appkey", appkey.c_str());
   finclip_params_set(config, "secret", secret.c_str());
   finclip_params_set(config, "domain", domain.c_str());
-  finclip_params_set(config, "start_flag", "2"); // kAppletSync
-  finclip_params_set(config, "show_loading", "0");
-  finclip_register_api(packer, kApplet, "api", CustomApi, nullptr);
-  finclip_register_api(packer, kWebView, "webapi", CustomApi, nullptr);
+  // finclip_register_api(packer, kApplet, "api", CustomApi, nullptr);
+  // finclip_register_api(packer, kWebView, "webapi", CustomApi, nullptr);
 
-  finclip_initialize(packer);
+  finclip_init_with_config(app_store, config);
   is_initialized = TRUE;
 }
 
