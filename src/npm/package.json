@@ -1,17 +1,12 @@
 {
   "name": "finclip",
-  "version": "1.0.0",
+  "version": "1.3.6",
   "description": "",
-  "main": "./finclip.node",
+  "main": "index.js",
   "scripts": {
-    "configure": "node-gyp configure",
-    "build": "node-gyp build",
-    "rebuild": "node-gyp rebuild",
-    "erebuild": "electron-rebuild -v 13.6.6"
   },
   "devDependencies": {
-    "electron-rebuild": "^3.2.7",
-    "node-addon-api": "^1.7.2"
-  },
-  "gypfile": true
+    "ffi-napi": "^4.0.3",
+    "ref-napi": "^3.0.3"
+  }
 }

@@ -18,7 +18,7 @@
 
 #include "json.hpp"
 
-#include "finclip_api.h"
+#include "./finclip_api.h"
 
 #define MAX_LOADSTRING 100
 

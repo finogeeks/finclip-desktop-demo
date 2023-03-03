@@ -1,19 +1,38 @@
-const path = require('path');
-const finclip = require('./build/Release/finclip.node');
-const finclipPath = path.resolve(__dirname, '../../vendor/win/x64/finclip.exe');
+const ffi = require('ffi-napi');
+const ref = require('ref-napi');
 
-const factory = finclip.finclip_get_packer_factory();
-const packer = finclip.finclip_packer_factory_get_config_packer(factory);
-finclip.finclip_initialize(packer);
-const config = finclip.finclip_create_params();
-finclip.finclip_params_set(config, "appstore", "1");
-finclip.finclip_params_set(config, "appkey", "22LyZEib0gLTQdU3MUauAfJ/xujwNfM6OvvEqQyH4igA");
-finclip.finclip_params_set(config, "secret", "703b9026be3d6bc5");
-finclip.finclip_params_set(config, "domain", "https://finclip-testing.finogeeks.club");
-finclip.finclip_params_set(config, "exe_path", finclipPath);
-finclip.finclip_config_packer_add_config(packer, config);
-finclip.finclip_params_set(config, "window_type", "1");
-finclip.finclip_register_lifecycle("6152b5dbfcfb4e0001448e6e", 1, console.log, {a:1});
-finclip.finclip_start_applet("1", "6152b5dbfcfb4e0001448e6e");
+const finclip = {};
+let lib = {};
 
-setTimeout(() => {}, 600 * 1000);
+const configObj = ref.types.void;
+const configObjPtr = ref.refType(configObj);
+
+const loadLibrary = libraryPath => {
+  lib = ffi.Library(libraryPath, {
+    'finclip_create_params': [ configObjPtr, [] ],
+    'finclip_params_set': ['int', [configObjPtr, 'string', 'string' ] ],
+    'finclip_init_with_config': [ 'int', [ 'string', configObjPtr ] ],
+    'finclip_start_applet': [ 'int', ['string', 'string' ] ],
+    'finclip_start_applet_embed': [ 'int', ['string', 'string', configObjPtr, 'int' ] ],
+    'finclip_close_applet': [ 'int', ['string' ] ],
+    'finclip_set_position': [ 'int', ['string', 'int', 'int', 'int', 'int' ] ],
+    'finclip_register_lifecycle': [ 'int', [ 'string', 'int', 'pointer', 'string' ] ],
+  });
+
+  finclip.finclip_create_params = lib.finclip_create_params;
+  finclip.finclip_params_set = lib.finclip_params_set;
+  finclip.finclip_init_with_config = lib.finclip_init_with_config;
+  finclip.finclip_start_applet = lib.finclip_start_applet;
+  finclip.finclip_start_applet_embed = lib.finclip_start_applet_embed;
+  finclip.finclip_close_applet = lib.finclip_close_applet;
+  finclip.finclip_set_position = lib.finclip_set_position;
+
+  finclip.finclip_register_lifecycle = (appid, type, fn, data) => {
+    const callback = ffi.Callback('void', [ 'int', 'string', 'string' ], fn);
+    return lib.finclip_register_lifecycle(appid, type, callback, data);
+  };
+};
+
+finclip.load_library = loadLibrary;
+
+module.exports = finclip;

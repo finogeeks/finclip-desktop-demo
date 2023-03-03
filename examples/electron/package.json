@@ -13,6 +13,8 @@
     "electron": "^18.0.0"
   },
   "dependencies": {
-    "finclip": "file:../../src/npm/build/Release"
+    "finclip": "file:../../src/npm",
+    "ffi-napi": "^4.0.3",
+    "ref-napi": "^3.0.3"
   }
 }

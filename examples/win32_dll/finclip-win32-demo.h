@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../src/finclip_api.h"
+#include "./finclip_api.h"
 #include "resource.h"
 
 typedef IPackerFactory *(FINSTDMETHODCALLTYPE *findll_get_packer_factory)();
