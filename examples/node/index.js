@@ -5,10 +5,10 @@ const libraryPath = path.resolve(__dirname, '../../vendor/win/x64/FinClipSDKWrap
 const finclipPath = path.resolve(__dirname, '../../vendor/win/x64/finclip/finclip.exe');
 
 const APP_STORE = '1';
-const APP_KEY = 'Cd9iQDv+6YHGPuYz6kdXhOD1UI9UWvwhLfWaOzsyq0M=';
-const APP_SECRET = 'b8d249d57482554c';
-const DOMAIN = 'https://api.finclip.com';
-const APP_ID = '63e30f1d3dc3390001ffbb84';
+const APP_KEY = '';
+const APP_SECRET = '';
+const DOMAIN = '';
+const APP_ID = '';
 
 finclip.load_library(libraryPath);
 const config = finclip.finclip_create_params();
