@@ -70,14 +70,7 @@
 
 ## 桌面版 SDK 支持进展
 
-由于不同应用程序所依赖的语言不同，我们分别为 Win32，Python，JavaScript 提供了不同的 DEMO，您可在下方表格中获取资源或查看研发进展。
-
-|  语言 | GUI 技术  | 状态  | 系统          |  DEMO 地址  |  语言库 | 备注 |
-|---|---|---|---|---|---|---|
-| C++ | win32 | 测试中 | Windows | [win32](examples/win32)  | - |  |
-| C++ | qt | 开发中 | Windows | [qt](examples/qt)  | - | qmake |
-| Python | pyqt 5 | 开发中 | Windows / Mac | [Pyqt](examples/pyqt) | -  |   |
-| JavaScript | Electron | 测试中 | Windows | [Electron](examples/electron) | [node](https://github.com/finogeeks/finclip-desktop-demo/releases)  |   |
+目前已支持客户使用 C, C++, C#, python, delphi, electron 集成 FinClip 桌面版 SDK, 并在 Windows / Macos / Ubuntu / UOS 中验证
 
 ## DEMO 运行与 SDK 集成说明
 
