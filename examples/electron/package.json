@@ -10,9 +10,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^18.0.0"
-  },
-  "dependencies": {
-    "finclip": "file:../../src/npm/build/Release"
+    "electron": "^25.0.0",
+    "koffi": "^2.5.0"
   }
 }
