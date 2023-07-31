@@ -1,7 +1,7 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const os = require('os');
 const path = require('path');
-const finclip = require('finclip');
+const finclip = require('./finclip');
 
 let hwnd = 0;
 let appid_ = "";
@@ -11,6 +11,11 @@ let childWindow = null;
 let embed = { x: 300, y: 0 };
 let isOpen = false;
 let isEmbed = false;
+
+const finclipPath = path.resolve(__dirname, '../../../vendor/win/x64/FinClip/FinClip.exe');
+const libraryPath = path.resolve(__dirname, '../../../vendor/win/x64', 'FinClipSDKWrapper.dll');
+
+finclip.load_library(libraryPath);
 
 const createMainWindow = () => {
   mainWindow = new BrowserWindow({
@@ -25,7 +30,7 @@ const createMainWindow = () => {
 };
 
 const createChildWindow = () => {
-  childWindow = new BrowserWindow({ 
+  childWindow = new BrowserWindow({
     parent: mainWindow,
     transparent: true,
     frame: false,
@@ -43,19 +48,14 @@ const openFinClipWindow = (arg) => {
   if (isOpen) return;
   const { domain, appkey, appid, secret } = arg;
   appid_ = appid;
-  const factory = finclip.finclip_get_packer_factory();
-  const packer = finclip.finclip_packer_factory_get_config_packer(factory);
-  finclip.finclip_initialize(packer);
-  const config = finclip.finclip_create_params();
-  finclip.finclip_params_set(config, "appstore", "1");
-  finclip.finclip_params_set(config, "appkey", appkey);
-  finclip.finclip_params_set(config, "secret", secret);
-  finclip.finclip_params_set(config, "domain", domain);
-  const finclipPath = path.resolve(__dirname, '../../../vendor/win/x64/finclip.exe');
-  finclip.finclip_params_set(config, "exe_path", finclipPath);
-  finclip.finclip_config_packer_add_config(packer, config);
-  finclip.finclip_params_set(config, "window_type", "1");
-  config_ = config;
+  const params = finclip.finclip_create_params();
+  finclip.finclip_params_set(params, "appstore", "1");
+  finclip.finclip_params_set(params, "appkey", appkey);
+  finclip.finclip_params_set(params, "secret", secret);
+  finclip.finclip_params_set(params, "domain", domain);
+  finclip.finclip_params_set(params, "exe_path", finclipPath);
+  finclip.finclip_init_with_config("1", params);
+  config_ = params;
   finclip.finclip_start_applet("1", appid);
   isOpen = true;
 };

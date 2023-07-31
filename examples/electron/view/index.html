@@ -1,32 +1,34 @@
 <html>
-    <head></head>
-    <body>
+
+<head></head>
+
+<body>
+    <div>
         <div>
-            <div>
-                启动参数
-            </div>
-            <div>
-                domain<input type="string" id="domain" name="domain" value="https://finclip-testing.finogeeks.club">
-            </div>
-            <div>
-                appkey<input type="string" id="appkey" name="appkey" value="22LyZEib0gLTQdU3MUauAfJ/xujwNfM6OvvEqQyH4igA">
-            </div>
-            <div>
-                appid<input type="string" id="appid" name="appid" value="6152b5dbfcfb4e0001448e6e">
-            </div>
-            <div>
-                secret<input type="string" id="secret" name="secret" value="703b9026be3d6bc5">
-            </div>
+            启动参数
         </div>
         <div>
-            <button onclick="openFinClipWindow()">open</button>
-            <button onclick="embedFinClipWindow()">embed</button>
-            <button onclick="closeFinClipWindow()">close</button>
+            domain<input type="string" id="domain" name="domain" value="">
         </div>
         <div>
-            <br />
+            appkey<input type="string" id="appkey" name="appkey" value="">
         </div>
-        <!-- <div>
+        <div>
+            appid<input type="string" id="appid" name="appid" value="">
+        </div>
+        <div>
+            secret<input type="string" id="secret" name="secret" value="">
+        </div>
+    </div>
+    <div>
+        <button onclick="openFinClipWindow()">open</button>
+        <button onclick="embedFinClipWindow()">embed</button>
+        <button onclick="closeFinClipWindow()">close</button>
+    </div>
+    <div>
+        <br />
+    </div>
+    <!-- <div>
             <div>
                 设置位置
             </div>
@@ -36,6 +38,7 @@
             <div>height<input type="number" id="height" name="height" value="1000"></div>
             <div><button onclick="setFinClipPosition()">set position</button></div>
         </div> -->
-    </body>
-    <script src="../src/mainScript.js"></script>
+</body>
+<script src="../src/mainScript.js"></script>
+
 </html>
