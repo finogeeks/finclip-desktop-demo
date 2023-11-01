@@ -1,4 +1,5 @@
 const koffi = require('koffi');
+const os = require('os');
 
 const finclip = {};
 let lib;
@@ -14,7 +15,9 @@ const loadLibrary = libraryPath => {
   finclip.finclip_params_set = lib.func('finclip_params_set', 'int', ['POINT', 'string', 'string']);
   finclip.finclip_init_with_config = lib.func('finclip_init_with_config', 'int', ['string', 'POINT']);
   finclip.finclip_start_applet = lib.func('finclip_start_applet', 'int', ['string', 'string']);
-  finclip.finclip_start_applet_embed = lib.func('finclip_start_applet_embed', 'int', ['string', 'string', 'POINT', 'int']);
+  if (os.platform() === 'win32') {
+    finclip.finclip_start_applet_embed = lib.func('finclip_start_applet_embed', 'int', ['string', 'string', 'POINT', 'int']);
+  }
   finclip.finclip_close_applet = lib.func('finclip_close_applet', 'int', ['string']);
   finclip.finclip_set_position = lib.func('finclip_set_position', 'int', ['string', 'int', 'int', 'int', 'int']);
   finclip.finclip_callback_success = lib.func('finclip_callback_success', 'int', ['int', 'POINT']);

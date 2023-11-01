@@ -12,8 +12,16 @@ let embed = { x: 300, y: 0 };
 let isOpen = false;
 let isEmbed = false;
 
-const finclipPath = path.resolve(__dirname, '../../../vendor/win/x64/FinClip/FinClip.exe');
-const libraryPath = path.resolve(__dirname, '../../../vendor/win/x64', 'FinClipSDKWrapper.dll');
+let finclipPath;
+let libraryPath;
+
+if (os.platform() === 'win32') {
+  finclipPath = path.resolve(__dirname, '../../../vendor/win/x64/FinClip/FinClip.exe');
+  libraryPath = path.resolve(__dirname, '../../../vendor/win/x64', 'FinClipSDKWrapper.dll');
+} else if (os.platform() === 'darwin') {
+  finclipPath = path.resolve(__dirname, '../../../vendor/mac/x64/FinClip.app');
+  libraryPath = path.resolve(__dirname, '../../../vendor/mac/x64', 'libFinClipSDKWrapper.so');
+}
 
 finclip.load_library(libraryPath);
 
@@ -62,6 +70,7 @@ const openFinClipWindow = (arg) => {
 
 const embedFinClipWindow = () => {
   if (!isOpen) return;
+  if (os.platform() !== 'win32') return;
   createChildWindow();
   finclip.finclip_start_applet_embed("1", appid_, config_, hwnd);
   resizeChildWindow();
