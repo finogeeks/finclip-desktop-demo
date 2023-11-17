@@ -32,10 +32,10 @@ namespace WpfApp
         public static extern Int32 finclip_init_with_config([MarshalAs(UnmanagedType.LPUTF8Str)] string a, IntPtr config);
         [DllImport("FinClipSDKWrapper.dll", SetLastError = true)]
         public static extern Int32 finclip_start_applet([MarshalAs(UnmanagedType.LPUTF8Str)] string app_store, [MarshalAs(UnmanagedType.LPUTF8Str)] string appid);
-        private string DOMAIN;
-        private string APP_KEY;
-        private string SECRET;
-        private string APPID;
+        private string DOMAIN = "";
+        private string APP_KEY = "";
+        private string SECRET = "";
+        private string APPID = "";
         private string appstore = "test";
 
         private void OnLoaded(object sender, RoutedEventArgs routedEventArgs)
