@@ -4,27 +4,54 @@
 
 <body>
     <div>
-        <div>
+        <div class="title">
             启动参数
         </div>
-        <div>
-            domain<input type="string" id="domain" name="domain" value="">
+        <div class="input">
+            <div>appkey</div>
+            <input type="string" id="appkey" name="appkey" value="">
         </div>
-        <div>
-            appkey<input type="string" id="appkey" name="appkey" value="">
+        <div class="input">
+            <div>secret</div>
+            <input type="string" id="secret" name="secret" value="">
         </div>
-        <div>
-            appid<input type="string" id="appid" name="appid" value="">
+        <div class="input">
+            <div>domain</div>
+            <input type="string" id="domain" name="domain" value="">
         </div>
-        <div>
-            secret<input type="string" id="secret" name="secret" value="">
+        <div class="input">
+            <div>appid</div>
+            <input type="string" id="appid" name="appid" value="">
         </div>
+
     </div>
-    <div>
+    <div class="buttons">
         <button onclick="openFinClipWindow()">open</button>
+        <button onclick="openEmbedFinClipWindow()">embed</button>
         <button onclick="closeFinClipWindow()">close</button>
     </div>
 </body>
 <script src="../src/mainScript.js"></script>
+<style>
+    body {
+        user-select: none;
+    }
+
+    .title {
+        margin: 10px;
+    }
+
+    .input {
+        margin: 5px 10px 5px 10px;
+    }
+
+    .input>input {
+        width: 100%;
+    }
+
+    .buttons {
+        margin: 10px;
+    }
+</style>
 
 </html>
