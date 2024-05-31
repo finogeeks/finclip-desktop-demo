@@ -4,6 +4,7 @@ const path = require('path');
 const finclip = require('./finclip');
 
 let appid_ = "";
+const appstore = "1";
 let config_;
 let mainWindow = null;
 let isOpen = false;
@@ -20,16 +21,6 @@ if (os.platform() === 'win32') {
 }
 
 finclip.load_library(libraryPath);
-
-finclip.finclip_register_api(0, 'custom_api_sample', (name, params, data, id) => {
-  const message = finclip.finclip_create_params();
-  finclip.finclip_params_set(message, 'foo', 'bar');
-  finclip.finclip_callback_success(id, message);
-}, "");
-
-finclip.finclip_register_proxy('preview_media', (appid, name, res, callbackId, data) => {
-  console.log(JSON.parse(data));
-});
 
 const createMainWindow = () => {
   mainWindow = new BrowserWindow({
@@ -52,20 +43,42 @@ const openFinClipWindow = (arg) => {
   finclip.finclip_params_set(params, "appkey", appkey);
   finclip.finclip_params_set(params, "secret", secret);
   finclip.finclip_params_set(params, "domain", domain);
+  finclip.finclip_params_set(params, "development_framework", "electron");
   finclip.finclip_params_set(params, "exe_path", finclipPath);
-  finclip.finclip_init_with_config("1", params);
+  finclip.finclip_init_with_config(appstore, params);
   config_ = params;
 
   finclip.finclip_register_lifecycle(appid, 2, () => {
     isOpen = false;
   }, "");
 
-  finclip.finclip_register_more_btn_handler(appid, "menu-id", "菜单A", "", 0, (appid, menuId) => {
-    console.log("more btn clicked", appid, menuId);
-  }, '');
+  const startSuccess = finclip.finclip_start_applet(appstore, appid);
+  isOpen = (startSuccess === 0);
+};
 
-  finclip.finclip_start_applet("1", appid);
-  isOpen = true;
+const embedFinClipWindow = (arg) => {
+  if (os.platform() !== 'win32') return;
+  if (isOpen) return;
+  const { domain, appkey, appid, secret } = arg;
+  appid_ = appid;
+  const params = finclip.finclip_create_params();
+  finclip.finclip_params_set(params, "preload_process_number", "0");
+  finclip.finclip_params_set(params, "appkey", appkey);
+  finclip.finclip_params_set(params, "secret", secret);
+  finclip.finclip_params_set(params, "domain", domain);
+  finclip.finclip_params_set(params, "development_framework", "electron");
+  finclip.finclip_params_set(params, "exe_path", finclipPath);
+  finclip.finclip_init_with_config(appstore, params);
+  config_ = params;
+
+  finclip.finclip_register_lifecycle(appid, 2, () => {
+    isOpen = false;
+  }, "");
+
+  const handleBuffer = mainWindow.getNativeWindowHandle();
+  hwnd = os.endianness() == 'LE' ? handleBuffer.readInt32LE() : handleBuffer.readInt32BE();
+  const startSuccess = finclip.finclip_start_applet_embed(appstore, appid, params, hwnd);
+  isOpen = (startSuccess === 0);
 };
 
 const closeFinClipWindow = () => {
@@ -73,6 +86,10 @@ const closeFinClipWindow = () => {
   finclip.finclip_close_applet(appid_);
   isOpen = false;
 };
+
+ipcMain.on('EMBED_FINCLIP_WINDOW', (event, arg) => {
+  embedFinClipWindow(arg);
+});
 
 ipcMain.on('OPEN_FINCLIP_WINDOW', (event, arg) => {
   openFinClipWindow(arg);
