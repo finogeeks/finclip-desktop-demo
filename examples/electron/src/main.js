@@ -18,6 +18,10 @@ if (os.platform() === 'win32') {
 } else if (os.platform() === 'darwin') {
   finclipPath = path.resolve(__dirname, '../../../vendor/mac/x64/FinClip.app');
   libraryPath = path.resolve(__dirname, '../../../vendor/mac/x64', 'libFinClipSDKWrapper.so');
+} else if (os.platform() === 'linux') {
+  finclipPath = path.resolve(__dirname, '../../../vendor/linux/arm64/FinClip');
+  libraryPath = path.resolve(__dirname, '../../../vendor/linux/arm64', 'libFinClipSDKWrapper.so');
+  process.env['LD_LIBRARY_PATH'] = path.resolve(__dirname, '../../../vendor/linux/arm64/lib');
 }
 
 finclip.load_library(libraryPath);
