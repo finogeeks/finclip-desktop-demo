@@ -1,30 +1,65 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
-const os = require('os');
-const path = require('path');
-const finclip = require('./finclip');
+const { app, BrowserWindow, ipcMain } = require("electron");
+const os = require("os");
+const path = require("path");
+const finclip = require("./finclip");
 
-let appid_ = "";
-const appstore = "1";
-let config_;
 let mainWindow = null;
-let isOpen = false;
+const appstore = "1";
 
-let finclipPath;
-let libraryPath;
+const sdkState = {
+  isInitialized: false,
+  lastConfig: null,
+  paths: {
+    exe: "",
+    dll: "",
+  },
+};
 
-if (os.platform() === 'win32') {
-  finclipPath = path.resolve(__dirname, '../../../vendor/win/x64/FinClip/FinClip.exe');
-  libraryPath = path.resolve(__dirname, '../../../vendor/win/x64', 'FinClipSDKWrapper.dll');
-} else if (os.platform() === 'darwin') {
-  finclipPath = path.resolve(__dirname, '../../../vendor/mac/x64/FinClip.app');
-  libraryPath = path.resolve(__dirname, '../../../vendor/mac/x64', 'libFinClipSDKWrapper.so');
-} else if (os.platform() === 'linux') {
-  finclipPath = path.resolve(__dirname, '../../../vendor/linux/arm64/FinClip');
-  libraryPath = path.resolve(__dirname, '../../../vendor/linux/arm64', 'libFinClipSDKWrapper.so');
-  process.env['LD_LIBRARY_PATH'] = path.resolve(__dirname, '../../../vendor/linux/arm64/lib');
+function setupPaths() {
+  const platform = os.platform();
+  const vendorBase = path.resolve(__dirname, "../../../vendor");
+
+  if (platform === "win32") {
+    sdkState.paths.exe = path.join(
+      vendorBase,
+      "win",
+      "x64",
+      "FinClip",
+      "FinClip.exe"
+    );
+    sdkState.paths.dll = path.join(
+      vendorBase,
+      "win",
+      "x64",
+      "FinClipSDKWrapper.dll"
+    );
+  } else if (platform === "darwin") {
+    sdkState.paths.exe = path.join(vendorBase, "mac", "x64", "FinClip.app");
+    sdkState.paths.dll = path.join(
+      vendorBase,
+      "mac",
+      "x64",
+      "libFinClipSDKWrapper.so"
+    );
+  } else if (platform === "linux") {
+    sdkState.paths.exe = path.join(vendorBase, "linux", "arm64", "FinClip");
+    sdkState.paths.dll = path.join(
+      vendorBase,
+      "linux",
+      "arm64",
+      "libFinClipSDKWrapper.so"
+    );
+    process.env["LD_LIBRARY_PATH"] = path.join(
+      vendorBase,
+      "linux",
+      "arm64",
+      "lib"
+    );
+  }
 }
 
-finclip.load_library(libraryPath);
+setupPaths();
+finclip.load_library(sdkState.paths.dll);
 
 const createMainWindow = () => {
   mainWindow = new BrowserWindow({
@@ -32,75 +67,97 @@ const createMainWindow = () => {
     height: 600,
     autoHideMenuBar: true,
     webPreferences: {
-      preload: path.join(__dirname, 'mainPreload.js'),
+      preload: path.join(__dirname, "mainPreload.js"),
     },
   });
-  mainWindow.loadFile('../view/index.html');
+  mainWindow.loadFile("../view/index.html");
+};
+
+const createParams = (arg) => {
+  const { domain, appkey, secret } = arg;
+  const params = finclip.finclip_create_params();
+  finclip.finclip_params_set(params, "preload_process_number", "0");
+  finclip.finclip_params_set(params, "appkey", appkey);
+  finclip.finclip_params_set(params, "secret", secret);
+  finclip.finclip_params_set(params, "domain", domain);
+  finclip.finclip_params_set(params, "development_framework", "electron");
+  finclip.finclip_params_set(params, "exe_path", sdkState.paths.exe);
+  return params;
+};
+
+const onSdkFirstInit = () => {
+  console.log("FinClip SDK Initializing for the first time.");
+  // 自定义 api
+  finclip.finclip_register_api_v2(
+    0,
+    "test",
+    async (name, params, data, id, appId) => {}
+  );
+  // 代理方法注册一次即可
+  const proxyHandler = (appid, proxy_name, inputPtr, callbackId, params) => {};
+  finclip.finclip_register_proxy("more_custom_menu", proxyHandler, "");
+};
+
+const initializeFinClipSDK = (arg) => {
+  const { domain, appkey, secret } = arg;
+  const params = createParams(arg);
+  const newConfigSig = JSON.stringify({ domain, appkey, secret });
+  const oldConfigSig = JSON.stringify(sdkState.lastConfig);
+
+  if (!sdkState.isInitialized || newConfigSig !== oldConfigSig) {
+    if (!sdkState.isInitialized) {
+      onSdkFirstInit();
+    }
+    finclip.finclip_init_with_config(appstore, params);
+    sdkState.isInitialized = true;
+    sdkState.lastConfig = { domain, appkey, secret };
+  }
+  return params;
 };
 
 const openFinClipWindow = (arg) => {
-  if (isOpen) return;
-  const { domain, appkey, appid, secret } = arg;
-  appid_ = appid;
-  const params = finclip.finclip_create_params();
-  finclip.finclip_params_set(params, "preload_process_number", "0");
-  finclip.finclip_params_set(params, "appkey", appkey);
-  finclip.finclip_params_set(params, "secret", secret);
-  finclip.finclip_params_set(params, "domain", domain);
-  finclip.finclip_params_set(params, "development_framework", "electron");
-  finclip.finclip_params_set(params, "exe_path", finclipPath);
-  finclip.finclip_init_with_config(appstore, params);
-  config_ = params;
+  const { appid } = arg;
 
-  finclip.finclip_register_lifecycle(appid, 2, () => {
-    isOpen = false;
-  }, "");
+  initializeFinClipSDK(arg);
 
-  const startSuccess = finclip.finclip_start_applet(appstore, appid);
-  isOpen = (startSuccess === 0);
+  finclip.finclip_register_lifecycle(appid, 2, () => {}, "");
+
+  finclip.finclip_start_applet(appstore, appid);
 };
 
 const embedFinClipWindow = (arg) => {
-  if (os.platform() !== 'win32') return;
-  if (isOpen) return;
-  const { domain, appkey, appid, secret } = arg;
-  appid_ = appid;
-  const params = finclip.finclip_create_params();
-  finclip.finclip_params_set(params, "preload_process_number", "0");
-  finclip.finclip_params_set(params, "appkey", appkey);
-  finclip.finclip_params_set(params, "secret", secret);
-  finclip.finclip_params_set(params, "domain", domain);
-  finclip.finclip_params_set(params, "development_framework", "electron");
-  finclip.finclip_params_set(params, "exe_path", finclipPath);
-  finclip.finclip_init_with_config(appstore, params);
-  config_ = params;
+  if (os.platform() !== "win32") return;
+  if (!mainWindow) return;
 
-  finclip.finclip_register_lifecycle(appid, 2, () => {
-    isOpen = false;
-  }, "");
+  const { appid } = arg;
+
+  const params = initializeFinClipSDK(arg);
+
+  finclip.finclip_register_lifecycle(appid, 2, () => {}, "");
 
   const handleBuffer = mainWindow.getNativeWindowHandle();
-  hwnd = os.endianness() == 'LE' ? handleBuffer.readInt32LE() : handleBuffer.readInt32BE();
-  const startSuccess = finclip.finclip_start_applet_embed(appstore, appid, params, hwnd);
-  isOpen = (startSuccess === 0);
+  const hwnd =
+    os.endianness() === "LE"
+      ? handleBuffer.readInt32LE()
+      : handleBuffer.readInt32BE();
+  finclip.finclip_start_applet_embed(appstore, appid, params, hwnd);
 };
 
-const closeFinClipWindow = () => {
-  if (!isOpen) return;
-  finclip.finclip_close_applet(appid_);
-  isOpen = false;
+const closeFinClipWindow = (arg) => {
+  const { appid } = arg;
+  finclip.finclip_close_applet(appid);
 };
 
-ipcMain.on('EMBED_FINCLIP_WINDOW', (event, arg) => {
+ipcMain.on("EMBED_FINCLIP_WINDOW", (event, arg) => {
   embedFinClipWindow(arg);
 });
 
-ipcMain.on('OPEN_FINCLIP_WINDOW', (event, arg) => {
+ipcMain.on("OPEN_FINCLIP_WINDOW", (event, arg) => {
   openFinClipWindow(arg);
 });
 
-ipcMain.on('CLOSE_FINCLIP_WINDOW', (event, arg) => {
-  closeFinClipWindow();
+ipcMain.on("CLOSE_FINCLIP_WINDOW", (event, arg) => {
+  closeFinClipWindow(arg);
 });
 
 app.whenReady().then(() => {
