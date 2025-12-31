@@ -1,7 +1,7 @@
 const { app, BrowserWindow, ipcMain } = require("electron");
 const os = require("os");
 const path = require("path");
-const finclip = require("./finclip");
+const finclip = require("@finogeeks2026/finclip-desktop");
 
 let mainWindow = null;
 const appstore = "1";
@@ -34,11 +34,16 @@ function setupPaths() {
       "FinClipSDKWrapper.dll"
     );
   } else if (platform === "darwin") {
-    sdkState.paths.exe = path.join(vendorBase, "mac", "x64", "FinClip.app");
+    sdkState.paths.exe = path.join(
+      vendorBase,
+      "darwin",
+      "arm64",
+      "FinClip.app"
+    );
     sdkState.paths.dll = path.join(
       vendorBase,
-      "mac",
-      "x64",
+      "darwin",
+      "arm64",
       "libFinClipSDKWrapper.so"
     );
   } else if (platform === "linux") {

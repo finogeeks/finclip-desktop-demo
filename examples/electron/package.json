@@ -5,12 +5,14 @@
   "main": "./src/main.js",
   "scripts": {
     "start": "npx electron ./src/main.js",
+    "download": "download-finclip --url https://www-cdn.finclip.com --dest ../../vendor",
+    "download-all": "download-finclip --url https://www-cdn.finclip.com --dest ../../vendor --all",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "electron": "^22.3.27",
-    "koffi": "^2.14.1"
+    "@finogeeks2026/finclip-desktop": "^1.7.1"
   }
 }
